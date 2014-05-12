@@ -19,7 +19,7 @@ class omd::install {
   }
 
   ensure_resource('package',
-    $manage_package,
+    $managed_package,
     { ensure   => $omd::install::managed_package_ensure,
       provider => $omd::package_provider,
     })
