@@ -32,6 +32,8 @@ class omd::params {
       $dir_purge          = false
       $package            = 'omd'
       $package_provider   = 'apt'
+
+      $repo = 'http://labs.consol.de/repo/stable/ubuntu'
     }
     default: {
       fail("${::operatingsystem} not supported")
