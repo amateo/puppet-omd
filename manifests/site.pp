@@ -1,6 +1,9 @@
 define omd::site (
   $ensure = 'present',
 ) {
+  #
+  # Create/Remove site
+  # 
   case $ensure {
     'present': {
       @exec { "create_site_${name}":
@@ -9,6 +12,29 @@ define omd::site (
         unless  => "omd sites -b | /bin/grep -q '^${name}$'",
         creates => "/opt/omd/sites/${name}",
         tag     => 'omd::site',
+      }
+
+      $manage_service_enabled = $omd::ensure ? {
+        'absent' => undef,
+        default  => $omd::service_enable,
+      }
+
+      $manage_service_ensure = $omd::ensure ? {
+        'absent' => 'stopped',
+        default  => $omd::service_ensure,
+      }
+
+      @service { "site_service_${name}":
+        ensure     => $manage_service_ensure,
+        enable     => $manage_service_enable,
+        hasrestart => true,
+        hasstatus  => true,
+        restart    => "/usr/bin/omd restart ${name}",
+        start      => "/usr/bin/omd start ${name}",
+        status     => "/usr/bin/omd status ${name}",
+        stop       => "/usr/bin/omd stop ${name}",
+        provider   => 'base',
+        tag        => 'omd::site',
       }
     }
     'absent': {
@@ -32,28 +58,5 @@ define omd::site (
     default: {
       fail("ensure parameter ($ensure) must be \'present\' or \'absent\'")
     }
-  }
-
-  $manage_service_enabled = $omd::ensure ? {
-    'absent' => undef,
-    default  => $mod::service_enable,
-  }
-
-  $manage_service_ensure = $omd::ensure ? {
-    'absent' => 'stopped',
-    default  => $omd::service_ensure,
-  }
-
-
-  @service { "site_service_${name}":
-    ensure     => $manage_service_ensure,
-    enable     => $manage_service_enable,
-    hasrestart => true,
-    hasstatus  => true,
-    restart    => "/usr/bin/omd restart ${name}",
-    start      => "/usr/bin/omd start ${name}",
-    status     => "/usr/bin/omd status ${name}",
-    stop       => "/usr/bin/omd stop ${name}",
-    tag        => 'omd::site',
   }
 }
