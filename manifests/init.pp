@@ -155,10 +155,4 @@ class omd (
   class {'omd::config': } ~>
   class {'omd::service': } ~>
   anchor { 'omd::end': }
-
-  # Another anchor scheme. I prefer the first one
-#  class { 'omd::install': } ->
-#  class { 'omd::config': } ~>
-#  class { 'omd::service': } ->
-#  Class['omd']
 }
