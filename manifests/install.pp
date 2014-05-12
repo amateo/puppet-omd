@@ -13,8 +13,13 @@ class omd::install {
     absent  => 'absent',
   }
 
+  $managed_package = $omd::version ? {
+    present => $omd::package,
+    default => "omd-${omd::version}",
+  }
+
   ensure_resource('package',
-    $omd::package,
+    $manage_package,
     { ensure   => $omd::install::managed_package_ensure,
       provider => $omd::package_provider,
     })
