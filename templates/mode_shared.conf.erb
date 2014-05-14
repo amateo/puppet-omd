@@ -1,0 +1,16 @@
+# In shared mode all site specific apache configuration files are included
+# by the global apache process.
+
+# Make sure that symlink /omd does not make problems
+<Directory />
+  Options +FollowSymlinks
+</Directory>
+
+Include /omd/sites/<%= @sitename %>/etc/apache/conf.d/*.conf
+
+# Set site specific environment
+<Location "/<%= @sitename %>">
+SetEnv OMD_SITE <%= @sitename %>
+SetEnv OMD_ROOT /omd/sites/<%= @sitename %>
+SetEnv OMD_MODE shared
+</Location>
