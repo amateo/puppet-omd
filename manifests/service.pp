@@ -4,5 +4,5 @@
 # It ensure the service is running
 #
 class omd::service {
-  Service <| tag == 'omd::site' |>
+  Service <| tag == 'omd::site::service' |>
 }
