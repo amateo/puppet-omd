@@ -11,7 +11,7 @@ define omd::site (
         path    => '/usr/bin',
         unless  => "omd sites -b | /bin/grep -q '^${name}$'",
         creates => "/opt/omd/sites/${name}",
-        tag     => 'omd::site',
+        tag     => 'omd::site::config',
       }
 
       $manage_service_enabled = $omd::ensure ? {
@@ -34,7 +34,7 @@ define omd::site (
         status     => "/usr/bin/omd status ${name}",
         stop       => "/usr/bin/omd stop ${name}",
         provider   => 'base',
-        tag        => 'omd::site',
+        tag        => 'omd::site::service',
       }
     }
     'absent': {
@@ -44,14 +44,14 @@ define omd::site (
       #
       @mount {"/omd/sites/${name}/tmp":
         ensure => 'absent',
-        tag    => 'omd::site',
+        tag    => 'omd::site::config',
       }
 
       @exec { "remove_site_${name}":
         command  => "omd disable ${name} && /bin/rm -rf /opt/omd/sites/${name} && /usr/sbin/userdel ${name} && /usr/sbin/groupdel ${name}",
         path     => '/usr/bin',
         onlyif   => "omd sites -b | /bin/grep -q '^${name}$'",
-        tag      => 'omd::site',
+        tag      => 'omd::site::config',
         require  => Mount['/omd/sites/kk1/tmp'],
       }
     }
