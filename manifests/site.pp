@@ -35,6 +35,7 @@ define omd::site (
         stop       => "/usr/bin/omd stop ${name}",
         provider   => 'base',
         tag        => 'omd::site::service',
+        require    => Exec["create_site_${name}"],
       }
     }
     'absent': {
