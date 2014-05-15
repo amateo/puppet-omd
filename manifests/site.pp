@@ -132,7 +132,7 @@ define omd::site (
         path     => '/usr/bin',
         onlyif   => "omd sites -b | /bin/grep -q '^${sitename}$'",
         tag      => 'omd::site::config',
-        require  => Mount['/omd/sites/kk1/tmp'],
+        require  => Mount["/omd/sites/${sitename}/tmp"],
       }
     }
     default: {
