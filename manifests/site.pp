@@ -2,6 +2,7 @@ define omd::site (
   $site   = '',
   $ensure = 'present',
   $mode   = 'own',
+  $defaultgui = ''
 ) {
   validate_re($mode, '^(own|shared)$',
     'mode parameter must be one of \'own\' or \'shared\'')
@@ -78,6 +79,18 @@ define omd::site (
         file {"/omd/sites/${sitename}/etc/apache/mode.conf":
           ensure => 'link',
           target => "mode_${name}.conf",
+        }
+
+        omd::site::config {'CONFIG_APACHE_MODE':
+          value => 'shared',
+          site  => $sitename,
+        }
+      }
+
+      if $defaultgui != '' {
+        omd::site::config {'CONFIG_DEFAULT_GUI':
+          site  => $sitename,
+          value => $defaultgui,
         }
       }
 
