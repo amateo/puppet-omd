@@ -81,16 +81,18 @@ define omd::site (
           target => "mode_${name}.conf",
         }
 
-        omd::site::config {'CONFIG_APACHE_MODE':
-          value => 'shared',
-          site  => $sitename,
+        omd::site::config {"CONFIG_APACHE_MODE_${name}":
+          site   => $sitename,
+          option => 'CONFIG_APACHE_MODE',
+          value  => 'shared',
         }
       }
 
       if $defaultgui != '' {
-        omd::site::config {'CONFIG_DEFAULT_GUI':
-          site  => $sitename,
-          value => $defaultgui,
+        omd::site::config {"CONFIG_DEFAULT_GUI_${name}":
+          site   => $sitename,
+          option => 'CONFIG_DEFAULT_GUI',
+          value  => $defaultgui,
         }
       }
 
