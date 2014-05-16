@@ -22,6 +22,7 @@ define omd::site (
   $ensure = 'present',
   $mode   = 'own',
   $defaultgui = '',
+  $core = 'nagios',
 ) {
   validate_re($mode, '^(own|shared)$',
     'mode parameter must be one of \'own\' or \'shared\'')
@@ -115,6 +116,11 @@ define omd::site (
           option => 'CONFIG_DEFAULT_GUI',
           value  => $defaultgui,
         }
+      }
+
+      case $core {
+        'nagios': { omd::site::nagios {$sitename:} }
+        default:  { fail("Core ${core} is not supported") }
       }
     }
     'absent': {
