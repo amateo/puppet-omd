@@ -88,5 +88,26 @@ define omd::site::nagios (
     notify => Exec["reload nagios ${name}"],
     target => "${nagiosdir}/conf.d/timeperiods.cfg",
   }
-
+  #
+  # Si los ficheros los crea el nagios_*, se crean con
+  # propietario root y permisos 600, así que fuerzo que
+  # sean del usuario que utiliza el nagios del site
+  file { [
+    "${nagiosdir}/conf.d/commands.cfg",
+    "${nagiosdir}/conf.d/contacts.cfg",
+    "${nagiosdir}/conf.d/contactgroups.cfg",
+    "${nagiosdir}/conf.d/hosts.cfg",
+    "${nagiosdir}/conf.d/hostdependency.cfg",
+    "${nagiosdir}/conf.d/hostescalation.cfg",
+    "${nagiosdir}/conf.d/hostextinfo.cfg",
+    "${nagiosdir}/conf.d/hostgroups.cfg",
+    "${nagiosdir}/conf.d/services.cfg",
+    "${nagiosdir}/conf.d/servicedependency.cfg",
+    "${nagiosdir}/conf.d/serviceescalation.cfg",
+    "${nagiosdir}/conf.d/serviceextinfo.cfg",
+    "${nagiosdir}/conf.d/servicegroups.cfg",
+    "${nagiosdir}/conf.d/timeperiods.cfg",
+  ]:
+    owner => $sitename,
+  }
 }
