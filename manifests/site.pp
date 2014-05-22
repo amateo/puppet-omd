@@ -110,12 +110,12 @@ define omd::site (
           ensure => 'link',
           target => "mode_${name}.conf",
         }
+      }
 
-        omd::site::config {"CONFIG_APACHE_MODE_${name}":
-          site   => $sitename,
-          option => 'CONFIG_APACHE_MODE',
-          value  => 'shared',
-        }
+      omd::site::config {"CONFIG_APACHE_MODE_${name}":
+        site   => $sitename,
+        option => 'CONFIG_APACHE_MODE',
+        value  => $mode,
       }
 
       if $defaultgui != '' {
