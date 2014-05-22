@@ -17,6 +17,13 @@
 # [*defaultgui*]
 #   Configures the default GUI for the site.
 #
+# [*core*]
+#   Configures de monitoring core to use. By default, nagios
+#
+# [*auth_options*]
+#   Parameter to pass apache auth options to the site. It configures the auth.conf
+#   with the options included.
+#
 define omd::site (
   $site         = '',
   $ensure       = 'present',
