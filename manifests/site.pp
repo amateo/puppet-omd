@@ -23,8 +23,7 @@ define omd::site (
   $mode         = 'own',
   $defaultgui   = '',
   $core         = 'nagios',
-  $auth_source  = '',
-  $auth_content = '',
+  $auth_options = '',
 ) {
   validate_re($mode, '^(own|shared)$',
     'mode parameter must be one of \'own\' or \'shared\'')
@@ -125,23 +124,11 @@ define omd::site (
         default:  { fail("Core ${core} is not supported") }
       }
 
-      if ($auth_source or $auth_content) and $mode == 'own' {
-        $manage_source = $auth_source ? {
-          ''      => undef,
-          default => $auth_source,
-        }
-        $manage_content = $auth_content ? {
-          ''      => undef,
-          default => $auth_content,
-        }
-        @file {"auth.conf_${name}":
-          path    => "${sitedir}/etc/apache/conf.d/auth.conf",
-          owner   => $sitename,
-          group   => $sitename,
-          mode    => '0640',
-          content => $manage_content,
-          source  => $manage_source,
-          tag     => 'omd::site::config',
+      if $auth_options and $mode == 'own' {
+        notify {"CONFIGURANDO AUTH DE ${sitename}":}
+        omd::site::auth {"auth_${name}":
+          site    => $sitename,
+          options => $auth_options,
         }
       }
     }
