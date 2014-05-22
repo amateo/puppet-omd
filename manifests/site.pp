@@ -85,7 +85,7 @@ define omd::site (
           owner    => $sitename,
           group    => $sitename,
           mode     => '0644',
-          template => 'omd/fcgid_site.conf.erb',
+          template => 'omd/fcgid_site_shared.conf.erb',
           require  => [ Exec["create_site_${name}"],
                         File["${sitedir}/etc/apache/conf.d/02_fcgid.conf"],
           ]
