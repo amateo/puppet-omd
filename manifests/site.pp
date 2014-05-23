@@ -24,9 +24,6 @@
 #   Parameter to pass apache auth options to the site. It configures
 #   the auth.conf file with the options included.
 #
-# [*apache_modules*]
-#   Array with additional modules loaded in the apache instance
-#
 define omd::site (
   $site         = '',
   $ensure       = 'present',
@@ -34,21 +31,9 @@ define omd::site (
   $defaultgui   = '',
   $core         = 'nagios',
   $auth_options = '',
-  $apache_modules = [],
 ) {
-  # Validación
   validate_re($mode, '^(own|shared)$',
     'mode parameter must be one of \'own\' or \'shared\'')
-
-  validate_array($apache_modules)
-
-  if size($apache_modules) and $mode == 'shared' {
-    warning("Apache modules are not configured when shared mode is configured. You should configure them directly in apache configuration")
-  }
-
-  #
-  ##
-  #
 
   $sitename = $site ? {
     ''      => $name,
@@ -123,10 +108,10 @@ define omd::site (
         'shared' => "mode_${name}.conf",
       }
 
-      @file {"${sitedir}/etc/apache/mode.conf":
+      file {"${sitedir}/etc/apache/mode.conf":
         ensure => 'link',
+        #target => "mode_${name}.conf",
         target => $mode_target,
-        tag    => 'omd::site::config',
       }
 
       if $mode == 'shared' {
@@ -139,14 +124,6 @@ define omd::site (
           require  => [ Exec["create_site_${name}"],
                         File["${sitedir}/etc/apache/mode.conf"],
           ]
-        }
-      } elsif $mode == 'own' {
-        @file { "${sitedir}/etc/apache/apache.conf":
-          owner   => $sitename,
-          group   => $sitename,
-          mode    => '0640',
-          content => template('omd/site/apache.conf.erb'),
-          tag     => 'omd::site::config',
         }
       }
 
