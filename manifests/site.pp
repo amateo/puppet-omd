@@ -83,7 +83,7 @@ define omd::site (
       # Configuración del apache, dependiendo del modo
       #
       $fcgid_template = $mode ? {
-        shared  => 'omd/fcgid_site_shared.conf.erb',
+        shared  => 'omd/site/fcgid_site_shared.conf.erb',
         own     => 'omd/site/fcgid_site_own.conf.erb',
         default => undef,
       }
@@ -120,7 +120,7 @@ define omd::site (
           owner    => $sitename,
           group    => $sitename,
           mode     => '0644',
-          template => 'omd/mode_shared.conf.erb',
+          template => 'omd/site/mode_shared.conf.erb',
           require  => [ Exec["create_site_${name}"],
                         File["${sitedir}/etc/apache/mode.conf"],
           ]
