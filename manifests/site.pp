@@ -147,7 +147,6 @@ define omd::site (
       }
 
       if $auth_options and $mode == 'own' {
-        notify {"CONFIGURANDO AUTH DE ${sitename}":}
         omd::site::auth {"auth_${name}":
           site    => $sitename,
           options => $auth_options,
