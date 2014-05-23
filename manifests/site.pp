@@ -79,18 +79,42 @@ define omd::site (
         require    => Exec["create_site_${name}"],
       }
 
-      if $mode == 'shared' {
-        apache::dotconf{"02_fcgid_${name}":
-          path     => "${sitedir}/etc/apache/conf.d/",
-          owner    => $sitename,
-          group    => $sitename,
-          mode     => '0644',
-          template => 'omd/fcgid_site_shared.conf.erb',
-          require  => [ Exec["create_site_${name}"],
-                        File["${sitedir}/etc/apache/conf.d/02_fcgid.conf"],
-          ]
-        }
+      #
+      # Configuración del apache, dependiendo del modo
+      #
+      $fcgid_template = $mode ? {
+        shared  => 'omd/fcgid_site_shared.conf.erb',
+        own     => 'omd/site/fcgid_site_own.conf.erb',
+        default => undef,
+      }
 
+      apache::dotconf{"02_fcgid_${name}":
+        path     => "${sitedir}/etc/apache/conf.d/",
+        owner    => $sitename,
+        group    => $sitename,
+        mode     => '0644',
+        template => $fcgid_template,
+        require  => [ Exec["create_site_${name}"],
+                      File["${sitedir}/etc/apache/conf.d/02_fcgid.conf"],
+        ]
+      }
+
+      file {"${sitedir}/etc/apache/conf.d/02_fcgid.conf":
+        ensure => 'absent',
+      }
+
+      $mode_target = $mode ? {
+        'own'    => 'apache-own.conf',
+        'shared' => "mode_${name}.conf",
+      }
+
+      file {"${sitedir}/etc/apache/mode.conf":
+        ensure => 'link',
+        #target => "mode_${name}.conf",
+        target => $mode_target,
+      }
+
+      if $mode == 'shared' {
         apache::dotconf {"mode_${name}":
           path     => "${sitedir}/etc/apache",
           owner    => $sitename,
@@ -100,15 +124,6 @@ define omd::site (
           require  => [ Exec["create_site_${name}"],
                         File["${sitedir}/etc/apache/mode.conf"],
           ]
-        }
-
-        file {"${sitedir}/etc/apache/conf.d/02_fcgid.conf":
-          ensure => 'absent',
-        }
-
-        file {"${sitedir}/etc/apache/mode.conf":
-          ensure => 'link',
-          target => "mode_${name}.conf",
         }
       }
 
