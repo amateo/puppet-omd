@@ -3,7 +3,7 @@
 	Allow From All
 
   AuthName "OMD Monitoring Site <%= @site %>"
-	AuthType Basic
+  AuthType Basic
 <%- if @options.is_a?(Hash) -%>
   <%- @options.sort.each do |key, value| -%>
   <%= key %> <%= value %>
