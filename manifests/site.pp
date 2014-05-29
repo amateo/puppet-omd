@@ -27,6 +27,9 @@
 # [*apache_modules*]
 #   Array with additional modules loaded in the apache instance
 #
+# [*omadmin*]
+#   User of array of users with administration privileges.
+#
 define omd::site (
   $site         = '',
   $ensure       = 'present',
@@ -35,6 +38,7 @@ define omd::site (
   $core         = 'nagios',
   $auth_options = '',
   $apache_modules = [],
+  $admin_users = 'omdadmin',
 ) {
   # Validación
   validate_re($mode, '^(own|shared)$',
@@ -42,8 +46,12 @@ define omd::site (
 
   validate_array($apache_modules)
 
+  if !is_array($admin_user) and !is_string($admin_user) {
+    fail('admin_user parameter must be a String or Array of Strings')
+  }
+
   if size($apache_modules) and $mode == 'shared' {
-    warning("Apache modules are not configured when shared mode is configured. You should configure them directly in apache configuration")
+    warning('Apache modules are not configured when shared mode is configured. You should configure them directly in apache configuration')
   }
 
   #
@@ -174,6 +182,46 @@ define omd::site (
           site    => $sitename,
           options => $auth_options,
         }
+      }
+
+      @file {"${sitedir}/etc/check_mk/multisite.mk":
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0644',
+        content => template('omd/site/check_mk/multisite.mk.erb'),
+        tag     => 'omd::site::config',
+      }
+
+      @file {"${sitedir}/etc/nagios/nagios.cfg":
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0644',
+        content => template('omd/site/nagios/cgi.cfg.erb'),
+        tag     => 'omd::site::config',
+      }
+
+      @file {"${sitedir}/etc/shinken/nagios.cfg":
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0644',
+        content => template('omd/site/shinken/cgi.cfg.erb'),
+        tag     => 'omd::site::config',
+      }
+
+      @file {"${sitedir}/etc/icinga/nagios.cfg":
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0644',
+        content => template('omd/site/icinga/cgi.cfg.erb'),
+        tag     => 'omd::site::config',
+      }
+
+      @file {"${sitedir}/etc/pnp4nagios/config.php":
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0644',
+        content => template('omd/site/pnp4nagios/config.php.erb'),
+        tag     => 'omd::site::config',
       }
     }
     'absent': {
