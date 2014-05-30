@@ -70,7 +70,7 @@ define omd::site (
   #
   case $ensure {
     'present': {
-      @exec { "create_site_${name}":
+      exec { "create_site_${name}":
         command => "omd create ${sitename}",
         path    => '/usr/bin',
         unless  => "omd sites -b | /bin/grep -q '^${sitename}$'",
@@ -131,7 +131,7 @@ define omd::site (
         'shared' => "mode_${name}.conf",
       }
 
-      @file {"${sitedir}/etc/apache/mode.conf":
+      file {"${sitedir}/etc/apache/mode.conf":
         ensure => 'link',
         target => $mode_target,
         tag    => 'omd::site::config',
@@ -149,7 +149,7 @@ define omd::site (
           ]
         }
       } elsif $mode == 'own' {
-        @file { "${sitedir}/etc/apache/apache.conf":
+        file { "${sitedir}/etc/apache/apache.conf":
           owner   => $sitename,
           group   => $sitename,
           mode    => '0640',
@@ -184,7 +184,7 @@ define omd::site (
         }
       }
 
-      @file {"${sitedir}/etc/check_mk/multisite.mk":
+      file {"${sitedir}/etc/check_mk/multisite.mk":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
@@ -192,7 +192,7 @@ define omd::site (
         tag     => 'omd::site::config',
       }
 
-      @file {"${sitedir}/etc/nagios/cgi.cfg":
+      file {"${sitedir}/etc/nagios/cgi.cfg":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
@@ -200,7 +200,7 @@ define omd::site (
         tag     => 'omd::site::config',
       }
 
-      @file {"${sitedir}/etc/shinken/cgi.cfg":
+      file {"${sitedir}/etc/shinken/cgi.cfg":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
@@ -208,7 +208,7 @@ define omd::site (
         tag     => 'omd::site::config',
       }
 
-      @file {"${sitedir}/etc/icinga/cgi.cfg":
+      file {"${sitedir}/etc/icinga/cgi.cfg":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
@@ -216,7 +216,7 @@ define omd::site (
         tag     => 'omd::site::config',
       }
 
-      @file {"${sitedir}/etc/pnp4nagios/config.php":
+      file {"${sitedir}/etc/pnp4nagios/config.php":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
@@ -229,12 +229,12 @@ define omd::site (
       # Esto es un poco puñeta, pero el "omd rm <site>" es interactivo",
       # así que toca deshabilitarlo, desmontar el tmpfs y borrar a mano
       #
-      @mount {"/omd/sites/${sitename}/tmp":
+      mount {"/omd/sites/${sitename}/tmp":
         ensure => 'absent',
         tag    => 'omd::site::config',
       }
 
-      @exec { "remove_site_${name}":
+      exec { "remove_site_${name}":
         command  => "omd disable ${sitename} && /bin/rm -rf ${sitedir} && /usr/sbin/userdel ${sitename} && /usr/sbin/groupdel ${sitename}",
         path     => '/usr/bin',
         onlyif   => "omd sites -b | /bin/grep -q '^${sitename}$'",
