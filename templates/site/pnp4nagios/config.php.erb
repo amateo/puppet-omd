@@ -28,7 +28,7 @@ $conf['use_url_rewriting'] = 1;
 #
 # Location of rrdtool binary
 #
-$conf['rrdtool'] = "/omd/sites/telematica/bin/rrdtool";
+$conf['rrdtool'] = "/omd/sites/<%= @sitename %>/bin/rrdtool";
 #
 # RRDTool image size of graphs
 #
@@ -64,11 +64,11 @@ $conf['pdf_graph_opt'] = "";
 #
 # Directory where the RRD Files will be stored
 #
-$conf['rrdbase'] = "/omd/sites/telematica/var/pnp4nagios/perfdata/";
+$conf['rrdbase'] = "/omd/sites/<%= @sitename %>/var/pnp4nagios/perfdata/";
 #
 # Location of "page" configs
 #
-$conf['page_dir'] = "/omd/sites/telematica/etc/pnp4nagios/pages/";
+$conf['page_dir'] = "/omd/sites/<%= @sitename %>/etc/pnp4nagios/pages/";
 #
 # Site refresh time in seconds
 #
@@ -80,21 +80,21 @@ $conf['max_age'] = 60*60*6;
 #
 # Directory for temporary files used for PDF creation 
 #
-$conf['temp'] = "/omd/sites/telematica/tmp";
+$conf['temp'] = "/omd/sites/<%= @sitename %>/tmp";
 #
 # Link back to Nagios or Thruk ( www.thruk.org ) 
 #
-$conf['nagios_base'] = "/telematica/nagios/cgi-bin";
+$conf['nagios_base'] = "/<%= @sitename %>/nagios/cgi-bin";
 
 #
 # Link back to check_mk´s multisite ( http://mathias-kettner.de/checkmk_multisite.html )
 #
-$conf['multisite_base_url'] = "/telematica/check_mk";
+$conf['multisite_base_url'] = "/<%= @sitename %>/check_mk";
 #
 # Multisite Site ID this PNP installation is linked to
 # This is the same value as defined in etc/multisite.mk
 #
-$conf['multisite_site'] = "telematica";
+$conf['multisite_site'] = "<%= @sitename %>";
 
 #
 # check authorization against mk_livestatus API 
@@ -105,7 +105,7 @@ $conf['auth_enabled'] = FALSE;
 #
 # Livestatus socket path
 # 
-$conf['livestatus_socket'] = "unix:/omd/sites/telematica/tmp/run/live";
+$conf['livestatus_socket'] = "unix:/omd/sites/<%= @sitename %>/tmp/run/live";
 
 #
 # Which user is allowed to see all services or all hosts?
@@ -182,7 +182,7 @@ $conf['use_fpdf'] = 1;
 #
 # Use this file as PDF background.
 #
-$conf['background_pdf'] = '/omd/sites/telematica/etc/pnp4nagios/background.pdf' ;
+$conf['background_pdf'] = '/omd/sites/<%= @sitename %>/etc/pnp4nagios/background.pdf' ;
 #
 # Enable Calendar
 #
@@ -204,23 +204,23 @@ $views[] = array('title' => 'One Year',  'start' => (60*60*24*380) );
 # Use only with rrdtool svn revision 1511+
 #
 # $conf['RRD_DAEMON_OPTS'] = 'unix:/tmp/rrdcached.sock';
-$conf['RRD_DAEMON_OPTS'] = 'unix:/omd/sites/telematica/tmp/run/rrdcached.sock';
+$conf['RRD_DAEMON_OPTS'] = 'unix:/omd/sites/<%= @sitename %>/tmp/run/rrdcached.sock';
 
 # A list of directories to search for templates
 # /omd/versions/0.42/share/pnp4nagios/htdocs/templates.dist is always the last directory to be searched for templates
 #
 # Add your own template directories here
 # First match wins!
-$conf['template_dirs'][] = '/omd/sites/telematica/etc/pnp4nagios/templates';
-$conf['template_dirs'][] = '/omd/sites/telematica/local/share/check_mk/pnp-templates'; 
-$conf['template_dirs'][] = '/omd/sites/telematica/share/check_mk/pnp-templates';
-$conf['template_dirs'][] = '/omd/sites/telematica/share/pnp4nagios/htdocs/templates';
-$conf['template_dirs'][] = '/omd/sites/telematica/share/pnp4nagios/htdocs/templates.dist';
+$conf['template_dirs'][] = '/omd/sites/<%= @sitename %>/etc/pnp4nagios/templates';
+$conf['template_dirs'][] = '/omd/sites/<%= @sitename %>/local/share/check_mk/pnp-templates'; 
+$conf['template_dirs'][] = '/omd/sites/<%= @sitename %>/share/check_mk/pnp-templates';
+$conf['template_dirs'][] = '/omd/sites/<%= @sitename %>/share/pnp4nagios/htdocs/templates';
+$conf['template_dirs'][] = '/omd/sites/<%= @sitename %>/share/pnp4nagios/htdocs/templates.dist';
 
 #
 # Directory to search for special templates
 #
-$conf['special_template_dir'] = '/omd/sites/telematica/etc/pnp4nagios/templates.special';
+$conf['special_template_dir'] = '/omd/sites/<%= @sitename %>/etc/pnp4nagios/templates.special';
 
 #
 # Regex to detect mobile devices

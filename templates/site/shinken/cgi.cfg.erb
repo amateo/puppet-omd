@@ -1,9 +1,9 @@
 # ---------------------------------------------------------
 # Settings for OMD. Do not change!
-main_config_file=/omd/sites/telematica/tmp/shinken/shinken-apache.cfg
-physical_html_path=/omd/sites/telematica/share/nagios/htdocs
-url_html_path=/telematica/nagios
-cgi_base_url=/telematica/nagios/cgi-bin
+main_config_file=/omd/sites/<%= @sitename %>/tmp/shinken/shinken-apache.cfg
+physical_html_path=/omd/sites/<%= @sitename %>/share/nagios/htdocs
+url_html_path=/<%= @sitename %>/nagios
+cgi_base_url=/<%= @sitename %>/nagios/cgi-bin
 # ---------------------------------------------------------
 
 

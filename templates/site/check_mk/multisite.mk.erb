@@ -11,7 +11,7 @@ admin_users = [ <%= @admin_users.respond_to?('collect') ?
 #
 # The NagVis-Snapin needs to know the URL to nagvis.
 # This is not always /nagvis/ - especially not for OMD
-nagvis_base_url = "/telematica/nagvis"
+nagvis_base_url = "/<%= @sitename %>/nagvis"
 
 # Views allow to play alarm sounds according to the
 # "worst" state of the shown items. Enable sounds here:

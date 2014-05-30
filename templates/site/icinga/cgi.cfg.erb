@@ -1,17 +1,17 @@
 # ---------------------------------------------------------
 # Settings for OMD. Do not change!
-main_config_file=/omd/sites/telematica/tmp/icinga/icinga.cfg
-physical_html_path=/omd/sites/telematica/share/icinga/htdocs
-url_html_path=/telematica/icinga
-url_stylesheets_path=/telematica/icinga/stylesheets
-cgi_base_url=/telematica/icinga/cgi-bin
+main_config_file=/omd/sites/<%= @sitename %>/tmp/icinga/icinga.cfg
+physical_html_path=/omd/sites/<%= @sitename %>/share/icinga/htdocs
+url_html_path=/<%= @sitename %>/icinga
+url_stylesheets_path=/<%= @sitename %>/icinga/stylesheets
+cgi_base_url=/<%= @sitename %>/icinga/cgi-bin
 # ---------------------------------------------------------
 
 # ATTRIBUTE BASED AUTHORIZATION FILE
 # This option will include a file defining authroization based on
 # attributes.
 
-#authorization_config_file=/omd/sites/telematica/etc/icinga/cgiauth.cfg
+#authorization_config_file=/omd/sites/<%= @sitename %>/etc/icinga/cgiauth.cfg
 
 
 # HTTP CHARSET
@@ -65,7 +65,7 @@ use_logging=0
 # This is the cgi log file for information about what users are doing.
 # At the moment only submitted commands from cmd.cgi will be logged.
 
-cgi_log_file=/omd/sites/telematica/var/icinga/icinga-cgi.log
+cgi_log_file=/omd/sites/<%= @sitename %>/var/icinga/icinga-cgi.log
 
 
 # CGI LOG ROTATION METHOD
@@ -84,7 +84,7 @@ cgi_log_rotation_method=d
 # This is the directory where archived (rotated) cgi log files should be
 # placed (assuming you've chosen to do log rotation).
 
-cgi_log_archive_path=/omd/sites/telematica/var/icinga/archive
+cgi_log_archive_path=/omd/sites/<%= @sitename %>/var/icinga/archive
 
 
 # FORCE COMMENT

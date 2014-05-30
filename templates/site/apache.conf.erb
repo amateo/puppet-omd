@@ -17,18 +17,18 @@ ServerName 127.0.0.1
 # Better do not change anything in this block or you will have to
 # resolve conflicts in omd cp/mv/upate:
 
-ServerRoot "/omd/sites/telematica"
-PidFile /omd/sites/telematica/tmp/apache/run/apache.pid
-DocumentRoot "/omd/sites/telematica/var/www"
+ServerRoot "/omd/sites/<%= @sitename %>"
+PidFile /omd/sites/<%= @sitename %>/tmp/apache/run/apache.pid
+DocumentRoot "/omd/sites/<%= @sitename %>/var/www"
 
 # Include file where TCP port number is configured. That file
 # is automatically created and changed by 'omd config' if you
 # change APACHE_TCP_PORT.
-Include /omd/sites/telematica/etc/apache/listen-port.conf
+Include /omd/sites/<%= @sitename %>/etc/apache/listen-port.conf
 
 # User/Group to run the webserver with
-User telematica
-Group telematica
+User <%= @sitename %>
+Group <%= @sitename %>
 
 # ---------------------------------------------------------------
 # 
@@ -205,15 +205,15 @@ BrowserMatch "^Dreamweaver-WebDAV-SCM1" redirect-carefully
 # OMD OMD OMD OMD OMD OMD OMD OMD OMD OMD OMD OMD  ----------------------------
 # Do not change anything below here
 
-MIMEMagicFile /omd/sites/telematica/etc/apache/magic
-ErrorLog /omd/sites/telematica/var/log/apache/error_log
-CustomLog /omd/sites/telematica/var/log/apache/access_log combined
+MIMEMagicFile /omd/sites/<%= @sitename %>/etc/apache/magic
+ErrorLog /omd/sites/<%= @sitename %>/var/log/apache/error_log
+CustomLog /omd/sites/<%= @sitename %>/var/log/apache/access_log combined
 
 # fcgi settings must be site specific and cannot be used from shared apache
-SharememPath "/omd/sites/telematica/tmp/apache/fcgid_shm"
-SocketPath "/omd/sites/telematica/tmp/apache/fcgid_sock"
+SharememPath "/omd/sites/<%= @sitename %>/tmp/apache/fcgid_shm"
+SocketPath "/omd/sites/<%= @sitename %>/tmp/apache/fcgid_sock"
 
 # Load config files from the include dir. You can put your own
 # configuration there. Also addons put default files there.
-Include /omd/sites/telematica/etc/apache/conf.d/*.conf
+Include /omd/sites/<%= @sitename %>/etc/apache/conf.d/*.conf
 
