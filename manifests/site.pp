@@ -155,25 +155,32 @@ define omd::site (
           mode    => '0640',
           content => template('omd/site/apache.conf.erb'),
           tag     => 'omd::site::config',
+          require => Exec["create_site_${name}"],
         }
       }
 
       omd::site::config {"CONFIG_APACHE_MODE_${name}":
-        site   => $sitename,
-        option => 'CONFIG_APACHE_MODE',
-        value  => $mode,
+        site    => $sitename,
+        option  => 'CONFIG_APACHE_MODE',
+        value   => $mode,
+        require => Exec["create_site_${name}"],
       }
 
       if $defaultgui != '' {
         omd::site::config {"CONFIG_DEFAULT_GUI_${name}":
-          site   => $sitename,
-          option => 'CONFIG_DEFAULT_GUI',
-          value  => $defaultgui,
+          site    => $sitename,
+          option  => 'CONFIG_DEFAULT_GUI',
+          value   => $defaultgui,
+          require => Exec["create_site_${name}"],
         }
       }
 
       case $core {
-        'nagios': { omd::site::nagios {$sitename:} }
+        'nagios': {
+          omd::site::nagios {$sitename:
+            require => Exec["create_site_${name}"],
+          }
+        }
         default:  { fail("Core ${core} is not supported") }
       }
 
@@ -181,6 +188,7 @@ define omd::site (
         omd::site::auth {"auth_${name}":
           site    => $sitename,
           options => $auth_options,
+          require => Exec["create_site_${name}"],
         }
       }
 
@@ -190,6 +198,7 @@ define omd::site (
         mode    => '0644',
         content => template('omd/site/check_mk/multisite.mk.erb'),
         tag     => 'omd::site::config',
+        require => Exec["create_site_${name}"],
       }
 
       file {"${sitedir}/etc/nagios/cgi.cfg":
@@ -198,6 +207,7 @@ define omd::site (
         mode    => '0644',
         content => template('omd/site/nagios/cgi.cfg.erb'),
         tag     => 'omd::site::config',
+        require => Exec["create_site_${name}"],
       }
 
       file {"${sitedir}/etc/shinken/cgi.cfg":
@@ -206,6 +216,7 @@ define omd::site (
         mode    => '0644',
         content => template('omd/site/shinken/cgi.cfg.erb'),
         tag     => 'omd::site::config',
+        require => Exec["create_site_${name}"],
       }
 
       file {"${sitedir}/etc/icinga/cgi.cfg":
@@ -214,6 +225,7 @@ define omd::site (
         mode    => '0644',
         content => template('omd/site/icinga/cgi.cfg.erb'),
         tag     => 'omd::site::config',
+        require => Exec["create_site_${name}"],
       }
 
       file {"${sitedir}/etc/pnp4nagios/config.php":
@@ -222,6 +234,7 @@ define omd::site (
         mode    => '0644',
         content => template('omd/site/pnp4nagios/config.php.erb'),
         tag     => 'omd::site::config',
+        require => Exec["create_site_${name}"],
       }
     }
     'absent': {
