@@ -192,7 +192,7 @@ define omd::site (
         tag     => 'omd::site::config',
       }
 
-      @file {"${sitedir}/etc/nagios/nagios.cfg":
+      @file {"${sitedir}/etc/nagios/cgi.cfg":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
@@ -200,7 +200,7 @@ define omd::site (
         tag     => 'omd::site::config',
       }
 
-      @file {"${sitedir}/etc/shinken/nagios.cfg":
+      @file {"${sitedir}/etc/shinken/cgi.cfg":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
@@ -208,7 +208,7 @@ define omd::site (
         tag     => 'omd::site::config',
       }
 
-      @file {"${sitedir}/etc/icinga/nagios.cfg":
+      @file {"${sitedir}/etc/icinga/cgi.cfg":
         owner   => $sitename,
         group   => $sitename,
         mode    => '0644',
