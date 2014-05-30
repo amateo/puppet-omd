@@ -88,6 +88,7 @@ define omd::site::nagios (
     notify => Exec["reload nagios ${name}"],
     target => "${nagiosdir}/conf.d/timeperiods.cfg",
   }
+
   #
   # Si los ficheros los crea el nagios_*, se crean con
   # propietario root y permisos 600, así que fuerzo que
