@@ -23,12 +23,12 @@ define omd::site::auth (
 ) {
   $sitedir = "/opt/omd/sites/${site}"
 
-  @file {"auth.conf_${name}":
+  file {"auth.conf_${name}":
     path    => "${sitedir}/etc/apache/conf.d/auth.conf",
     owner   => $site,
     group   => $site,
     mode    => '0640',
     content => template('omd/site/auth.conf.erb'),
-    tag     => 'omd::site::config',
+    require => Exec["create_site_${site}"],
   }
 }
