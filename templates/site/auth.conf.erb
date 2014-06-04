@@ -6,7 +6,7 @@
   AuthType Basic
 <%- if @options.is_a?(Hash) -%>
   <%- @options.sort.each do |key, value| -%>
-  <%= key %> <%= value %>
+  <%= key %> <%= value.respond_to?('join') ? value.join("\n  " + key + " ") : value %>
   <%- end -%>
 <%- else -%>
   <%= @options.respond_to?('join') ? @options.join("\n  ") : @options %>
