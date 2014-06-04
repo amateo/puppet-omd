@@ -1,4 +1,4 @@
-define omd::site::config (
+define omd::site::option (
   $site,
   $option,
   $value,

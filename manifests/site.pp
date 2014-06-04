@@ -159,7 +159,7 @@ define omd::site (
         }
       }
 
-      omd::site::config {"CONFIG_APACHE_MODE_${name}":
+      omd::site::option {"CONFIG_APACHE_MODE_${name}":
         site    => $sitename,
         option  => 'CONFIG_APACHE_MODE',
         value   => $mode,
