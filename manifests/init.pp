@@ -152,7 +152,5 @@ class omd (
 
   anchor { 'omd::begin': } ->
   class {'omd::install': } ->
-  class {'omd::config': } ~>
-  class {'omd::service': } ~>
   anchor { 'omd::end': }
 }
