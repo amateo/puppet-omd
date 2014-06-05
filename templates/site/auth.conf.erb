@@ -4,11 +4,11 @@
 
   AuthName "OMD Monitoring Site <%= @site %>"
   AuthType Basic
-<%- if @options.is_a?(Hash) -%>
-  <%- @options.sort.each do |key, value| -%>
+<%- if @auth_options.is_a?(Hash) -%>
+  <%- @auth_options.sort.each do |key, value| -%>
   <%= key %> <%= value.respond_to?('join') ? value.join("\n  " + key + " ") : value %>
   <%- end -%>
 <%- else -%>
-  <%= @options.respond_to?('join') ? @options.join("\n  ") : @options %>
+  <%= @auth_options.respond_to?('join') ? @auth_options.join("\n  ") : @auth_options %>
 <%- end -%>
 </Location>

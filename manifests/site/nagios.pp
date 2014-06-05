@@ -10,17 +10,8 @@ define omd::site::nagios (
   $initdir = "${sitedir}/etc/init.d"
   $nagiosdir = "${sitedir}/etc/nagios"
 
-  #
-  # Configuramos el core a nagios
-  omd::site::config { "core_config_${name}":
-    site   => $sitename,
-    option => 'CONFIG_CORE',
-    value  => 'nagios',
-  }
-
   # Para recargar la configuración del nagios
   exec { "reload nagios ${name}":
-    #command    => "/usr/bin/omd reload ${sitename}",
     command     => "${initdir}/nagios reload",
     user        => $sitename,
     path        => "/bin:/usr/bin:${sitedir}/bin",
