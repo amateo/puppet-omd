@@ -102,3 +102,7 @@ omd::site {'test1':
     ],
   }
 }
+
+omd::nagios::plugin {'check_centreon_snmp_TcpConn':
+  source => 'puppet:///modules/omd/tests/check_centreon_snmp_TcpConn',
+}
