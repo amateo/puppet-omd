@@ -104,12 +104,25 @@ define omd::site::config (
   #
   # Configuración del etc/omd/site.conf
   #
-  file { "${sitedir}/etc/omd/site.conf":
-    ensure  => $ensure,
-    owner   => $site,
-    group   => $site,
-    mode    => '0644',
-    content => template('omd/site/omd/site.conf.erb'),
+  augeas { "${site}_defaultgui":
+    context => "/files/${sitedir}/etc/omd/site.conf",
+    changes => "set CONFIG_DEFAULT_GUI ${defaultgui}",
+    lens    => 'Shellvars.lns',
+    incl    => "${sitedir}/etc/omd/site.conf",
+  }
+
+  augeas { "${site}_apache_mode":
+    context => "/files/${sitedir}/etc/omd/site.conf",
+    changes => "set CONFIG_APACHE_MODE ${mode}",
+    lens    => 'Shellvars.lns',
+    incl    => "${sitedir}/etc/omd/site.conf",
+  }
+
+  augeas { "${site}_core":
+    context => "/files/${sitedir}/etc/omd/site.conf",
+    changes => "set CONFIG_CORE '${core}'",
+    lens    => 'Shellvars.lns',
+    incl    => "${sitedir}/etc/omd/site.conf",
   }
 
   if $ensure == 'present' {
