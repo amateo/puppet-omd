@@ -100,7 +100,8 @@ omd::site {'test1':
       'group telematadm',
       'ldap-attribute irisUserStatus=urn:mace:rediris.es:um.es:userStatus:nagios:estado:activo'
     ],
-  }
+  },
+  defaultgui => 'thruk',
 }
 
 omd::nagios::plugin {'check_centreon_snmp_TcpConn':
