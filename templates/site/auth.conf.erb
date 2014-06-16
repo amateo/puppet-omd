@@ -1,0 +1,14 @@
+<Location /<%= @site %>>
+	Order Allow,Deny
+	Allow From All
+
+  AuthName "OMD Monitoring Site <%= @site %>"
+  AuthType Basic
+<%- if @auth_options.is_a?(Hash) -%>
+  <%- @auth_options.sort.each do |key, value| -%>
+  <%= key %> <%= value.respond_to?('join') ? value.join("\n  " + key + " ") : value %>
+  <%- end -%>
+<%- else -%>
+  <%= @auth_options.respond_to?('join') ? @auth_options.join("\n  ") : @auth_options %>
+<%- end -%>
+</Location>
