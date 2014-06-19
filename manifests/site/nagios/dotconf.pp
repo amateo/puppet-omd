@@ -26,7 +26,7 @@ define omd::site::nagios::dotconf (
   $sitedir = "/omd/sites/${site}"
 
   $_path = $path ? {
-    undef   => "${sitedir}/etc/nagios/conf.d",
+    undef   => "${sitedir}/etc/nagios/conf.d/${name}",
     default => $path,
   }
 
