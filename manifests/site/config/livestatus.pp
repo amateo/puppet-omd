@@ -18,7 +18,7 @@ define omd::site::config::livestatus (
     }
   }
 
-  file {"${site} xinetd link":
+  file {"${_site} xinetd link":
     ensure => 'link',
     path   => "${sitedir}/etc/xinetd.d/mk-livestatus",
     target => '../mk-livestatus/xinetd.conf'
