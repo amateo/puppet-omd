@@ -18,10 +18,10 @@ define omd::site::config::livestatus (
     }
   }
 
-  augeas { "${_site}_livestatus_only_from":
-    context => "/files/${sitedir}/etc/mk-livestatus/xinetd.conf/service/",
-    changes => "set only_from 127.0.0.1",
-    lens    => 'xinetd.lns',
-    incl    => "${sitedir}/etc/mk-livestatus/xinetd.conf",
-  }
+  #augeas { "${_site}_livestatus_only_from":
+    #context => "/files/${sitedir}/etc/mk-livestatus/xinetd.conf/service/",
+    #changes => "set only_from 127.0.0.1",
+    #lens    => 'xinetd.lns',
+    #incl    => "${sitedir}/etc/mk-livestatus/xinetd.conf",
+  #}
 }
