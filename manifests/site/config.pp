@@ -193,11 +193,11 @@ define omd::site::config (
 
   if $ensure == 'present' {
     if $livestatus == 'on' {
-      anchor {"omd::site::config::${name}::begin": } ->
+      anchor {"omd::site::config::${name}::begin_lst": } ->
       omd::site::config::livestatus { $site:
         livestatus_port => $livestatus_port,
-      }
-      anchor {"omd::site::config::${name}::end": }
+      } ~>
+      anchor {"omd::site::config::${name}::end_lst": }
     }
   }
 }
