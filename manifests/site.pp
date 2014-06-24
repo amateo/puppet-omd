@@ -31,14 +31,16 @@
 #   User of array of users with administration privileges.
 #
 define omd::site (
-  $site         = '',
-  $ensure       = 'present',
-  $mode         = 'own',
-  $defaultgui   = 'welcome',
-  $core         = 'nagios',
-  $auth_options = '',
+  $site           = '',
+  $ensure         = 'present',
+  $mode           = 'own',
+  $defaultgui     = 'welcome',
+  $core           = 'nagios',
+  $auth_options   = '',
   $apache_modules = [],
-  $admin_users = 'omdadmin',
+  $admin_users    = 'omdadmin',
+  $livestatus     = 'off',
+  $livestatus_port = undef,
 ) {
   # Validación
   validate_re($ensure, '^(present|absent)$',
@@ -50,17 +52,24 @@ define omd::site (
   validate_re($core, '^(nagios)$',
     'At this moment, only nagios core is supported')
 
+  validate_re($livestatus, '^(on|off)$',
+    'livestatus parameter must be \'on\' or \'off\'')
+
   validate_re($defaultgui, '^(welcome|nagios|icinga|check_mk|thruk|nagvis)$',
-    "defaultgui \'$defaultgui\' not supported")
+    "defaultgui \'${defaultgui}\' not supported")
 
   validate_array($apache_modules)
 
-  if !is_array($admin_user) and !is_string($admin_user) {
+  if !is_array($admin_users) and !is_string($admin_users) {
     fail('admin_user parameter must be a String or Array of Strings')
   }
 
   if size($apache_modules) and $mode == 'shared' {
     warning('Apache modules are not configured when shared mode is configured. You should configure them directly in apache configuration')
+  }
+
+  if $livestatus == 'on' and !$livestatus_port {
+    fail('You must provide a livestatus port when it is enabled')
   }
 
   $sitename = $site ? {
@@ -74,14 +83,16 @@ define omd::site (
     site   => $sitename,
   } ->
   ::omd::site::config {$name:
-    ensure         => $ensure,
-    site           => $sitename,
-    mode           => $mode,
-    defaultgui     => $defaultgui,
-    core           => $core,
-    auth_options   => $auth_options,
-    admin_users    => $admin_users,
-    apache_modules => $apache_modules,
+    ensure          => $ensure,
+    site            => $sitename,
+    mode            => $mode,
+    defaultgui      => $defaultgui,
+    core            => $core,
+    auth_options    => $auth_options,
+    admin_users     => $admin_users,
+    apache_modules  => $apache_modules,
+    livestatus      => $livestatus,
+    livestatus_port => $livestatus_port,
   } ~>
   ::omd::site::service {$name:
     ensure => $ensure,
