@@ -1,12 +1,14 @@
 define omd::site::config (
   $site,
-  $ensure = 'present',
-  $mode   = 'own',
-  $defaultgui = 'welcome',
-  $core = 'nagios',
-  $auth_options = undef,
-  $admin_users  = 'omdadmin',
+  $ensure         = 'present',
+  $mode           = 'own',
+  $defaultgui     = 'welcome',
+  $core           = 'nagios',
+  $auth_options   = undef,
+  $admin_users    = 'omdadmin',
   $apache_modules = [],
+  $livestatus     = 'off',
+  $livestatus_port = 6557,
 ) {
   $sitename = $site
 
@@ -125,6 +127,20 @@ define omd::site::config (
     incl    => "${sitedir}/etc/omd/site.conf",
   }
 
+  augeas { "${site}_livestatus_tcp":
+    context => "/files/${sitedir}/etc/omd/site.conf",
+    changes => "set CONFIG_LIVESTATUS_TCP '${livestatus}'",
+    lens    => 'Shellvars.lns',
+    incl    => "${sitedir}/etc/omd/site.conf",
+  }
+
+  augeas { "${site}_livestatus_tcp_port":
+    context => "/files/${sitedir}/etc/omd/site.conf",
+    changes => "set CONFIG_LIVESTATUS_TCP_PORT '${livestatus_port}'",
+    lens    => 'Shellvars.lns',
+    incl    => "${sitedir}/etc/omd/site.conf",
+  }
+
   if $ensure == 'present' {
     case $core {
       'nagios': {
@@ -173,5 +189,15 @@ define omd::site::config (
     group   => $sitename,
     mode    => '0644',
     content => template('omd/site/pnp4nagios/config.php.erb'),
+  }
+
+  if $ensure == 'present' {
+    if $livestatus == 'on' {
+      anchor {"omd::site::config::${name}::begin_lst": } ->
+      omd::site::config::livestatus { $site:
+        livestatus_port => $livestatus_port,
+      } ~>
+      anchor {"omd::site::config::${name}::end_lst": }
+    }
   }
 }
