@@ -84,16 +84,17 @@ define omd::site (
     site   => $sitename,
   } ->
   ::omd::site::config {$name:
-    ensure          => $ensure,
-    site            => $sitename,
-    mode            => $mode,
-    defaultgui      => $defaultgui,
-    core            => $core,
-    auth_options    => $auth_options,
-    admin_users     => $admin_users,
-    apache_modules  => $apache_modules,
-    livestatus      => $livestatus,
-    livestatus_port => $livestatus_port,
+    ensure           => $ensure,
+    site             => $sitename,
+    mode             => $mode,
+    defaultgui       => $defaultgui,
+    core             => $core,
+    auth_options     => $auth_options,
+    admin_users      => $admin_users,
+    apache_modules   => $apache_modules,
+    livestatus       => $livestatus,
+    livestatus_port  => $livestatus_port,
+    livestatus_peers => $livestatus_peers,
   } ~>
   ::omd::site::service {$name:
     ensure => $ensure,
