@@ -21,7 +21,7 @@
             obj_readonly   = check_mk_objects\.cfg
         </configtool>
     </peer>
-<%- @_peers.sort.each do | name, port | -%>
+<%- @peers.sort.each do | name, port | -%>
     <peer>
         name    = <%= name %>
         type    = livestatus
