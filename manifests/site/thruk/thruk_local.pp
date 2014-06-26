@@ -11,7 +11,7 @@ define omd::site::thruk::thruk_local (
 
   file { "${name} thruk local":
     ensure  => 'present',
-    path    => "${sitedir}/etc/thruk_local.conf",
+    path    => "${sitedir}/etc/thruk/thruk_local.conf",
     owner   => $_site,
     group   => $_site,
     mode    => '0644',
