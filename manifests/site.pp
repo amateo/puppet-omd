@@ -41,6 +41,7 @@ define omd::site (
   $admin_users    = 'omdadmin',
   $livestatus     = 'off',
   $livestatus_port = undef,
+  $livestatus_peers = {},
 ) {
   # Validación
   validate_re($ensure, '^(present|absent)$',

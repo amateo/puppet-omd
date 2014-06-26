@@ -9,6 +9,7 @@ define omd::site::config (
   $apache_modules = [],
   $livestatus     = 'off',
   $livestatus_port = 6557,
+  $livestatus_peers = {},
 ) {
   $sitename = $site
 
@@ -198,6 +199,16 @@ define omd::site::config (
         livestatus_port => $livestatus_port,
       } ~>
       anchor {"omd::site::config::${name}::end_lst": }
+    }
+  }
+
+  if $ensure == 'present' {
+    if !$livestatus_peers {
+      anchor {"omd::site::config::${name}::begin_thruk": } ->
+      omd::site::thruk::thruk_local { $site:
+        peers => $livestatus_peers,
+      } ~>
+      anchor {"omd::site::config::${name}::end_thruk": }
     }
   }
 }
