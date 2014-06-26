@@ -15,6 +15,6 @@ define omd::site::thruk::thruk_local (
     owner   => $_site,
     group   => $_site,
     mode    => '0644',
-    content => template('omd/thruk/thruk_local.conf.erb'),
+    content => template('omd/site/thruk/thruk_local.conf.erb'),
   }
 }
