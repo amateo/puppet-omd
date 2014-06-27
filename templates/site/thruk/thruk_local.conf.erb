@@ -5,23 +5,7 @@
 ######################################
 # you can override settings from the thruk.conf in this file
 
-
-
 <Component Thruk::Backend>
-    <peer>
-        name    = <%= @_site %>
-        type    = livestatus
-        hidden  = 1
-        <options>
-        peer          = /omd/sites/<%= @_site %>/tmp/run/live
-        </options>
-        <configtool>
-            core_conf      = /omd/sites/<%= @_site %>/tmp/nagios/nagios.cfg
-            obj_check_cmd  = /omd/sites/<%= @_site %>/etc/init.d/core check
-            obj_reload_cmd = /omd/sites/<%= @_site %>/etc/init.d/core reload
-            obj_readonly   = check_mk_objects\.cfg
-        </configtool>
-    </peer>
 <%- @peers.sort.each do | name, port | -%>
     <peer>
         name    = <%= name %>
