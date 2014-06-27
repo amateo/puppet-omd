@@ -41,6 +41,7 @@ define omd::site (
   $admin_users    = 'omdadmin',
   $livestatus     = 'off',
   $livestatus_port = undef,
+  $livestatus_peers = undef,
 ) {
   # Validación
   validate_re($ensure, '^(present|absent)$',
@@ -72,6 +73,10 @@ define omd::site (
     fail('You must provide a livestatus port when it is enabled')
   }
 
+  if $livestatus_peers {
+    validate_hash($livestatus_peers)
+  }
+
   $sitename = $site ? {
     ''      => $name,
     default => $site,
@@ -83,16 +88,17 @@ define omd::site (
     site   => $sitename,
   } ->
   ::omd::site::config {$name:
-    ensure          => $ensure,
-    site            => $sitename,
-    mode            => $mode,
-    defaultgui      => $defaultgui,
-    core            => $core,
-    auth_options    => $auth_options,
-    admin_users     => $admin_users,
-    apache_modules  => $apache_modules,
-    livestatus      => $livestatus,
-    livestatus_port => $livestatus_port,
+    ensure           => $ensure,
+    site             => $sitename,
+    mode             => $mode,
+    defaultgui       => $defaultgui,
+    core             => $core,
+    auth_options     => $auth_options,
+    admin_users      => $admin_users,
+    apache_modules   => $apache_modules,
+    livestatus       => $livestatus,
+    livestatus_port  => $livestatus_port,
+    livestatus_peers => $livestatus_peers,
   } ~>
   ::omd::site::service {$name:
     ensure => $ensure,

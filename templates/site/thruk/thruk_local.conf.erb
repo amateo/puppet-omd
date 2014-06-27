@@ -1,0 +1,18 @@
+######################################
+# Site Specific Settings
+######################################
+
+######################################
+# you can override settings from the thruk.conf in this file
+
+<Component Thruk::Backend>
+<%- @peers.sort.each do | name, port | -%>
+    <peer>
+        name    = <%= name %>
+        type    = livestatus
+        <options>
+          peer          = localhost:<%= port %>
+        </options>
+    </peer>
+<%- end -%>
+</Component>
