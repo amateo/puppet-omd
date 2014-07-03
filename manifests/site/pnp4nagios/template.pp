@@ -44,8 +44,6 @@ define omd::site::pnp4nagios::template (
     default => $content,
   }
 
-  notify {"$name -> $path":}
-
   file { "pnp4nagios_template_${name}":
     ensure  => $ensure,
     path    => $_path,
