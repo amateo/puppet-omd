@@ -2,7 +2,7 @@ define omd::site::pnp4nagios::check_command (
   $site,
   $ensure = 'present',
   $command = undef,
-  $custom_template = 1,
+  #  $custom_template = undef,
   $options = {},
   $path = undef,
 ) {
