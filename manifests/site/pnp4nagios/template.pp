@@ -9,6 +9,7 @@ define omd::site::pnp4nagios::template (
   $mode     = '0644',
   $path     = undef,
   $template_name = undef,
+  $special  = false,
 ) {
   if !$source and !$content and !$template {
     fail('You must provide one of source, content or template parameters')
@@ -32,7 +33,10 @@ define omd::site::pnp4nagios::template (
   $sitedir = "/omd/sites/${site}"
 
   $_path = $path ? {
-    undef   => "${sitedir}/etc/pnp4nagios/templates/${_template_name}",
+    undef   => $special ? {
+      true    => "${sitedir}/etc/pnp4nagios/templates.special/${_template_name}",
+      default => "${sitedir}/etc/pnp4nagios/templates/${_template_name}",
+    },
     default => $path,
   }
 
