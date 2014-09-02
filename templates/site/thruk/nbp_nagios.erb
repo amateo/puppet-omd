@@ -2,7 +2,7 @@
 # Fichero generado con puppet
 #
 define host {
-  use thruk-bp-template
+  use <%= @host_template != '' ? @host_template : 'thruk-bp-template' %>
   host_name <%= @name %>
   alias Business Process: <%= @name %>
   _THRUK_NODE_ID node1
@@ -11,7 +11,7 @@ define host {
 
 define service {
   service_description <%= @name %>
-  use thruk-bp-node-template
+  use <%= @service_template != '' ? @service_template : 'thruk-bp-node-template' %>
   host_name <%= @name %>
   display_name <%= @name %>
   _THRUK_NODE_ID node1
