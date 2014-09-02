@@ -2,9 +2,11 @@
 <%-
   ids = Array.new
   nodes_json = Array.new
-  @nodes['nodes'].each { | key, node | 
-    nodes_json += [ node.to_json ]
-    ids = ids + [ node['id'] ] }
+  if @nodes then
+    @nodes['nodes'].each { | key, node | 
+      nodes_json += [ node.to_json ]
+      ids = ids + [ node['id'] ] }
+  end
 -%>
 {
    "rankDir" : "TB",
