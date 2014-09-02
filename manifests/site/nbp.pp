@@ -6,6 +6,8 @@ define omd::site::nbp (
   $state_type = 'both',
   $host_template   = '',
   $service_template   = '',
+  $host_name  = undef,
+  $service_name = undef,
 ) {
   validate_re($core, '^(nagios)$',
     'On nagios core is supported by now')
@@ -22,6 +24,15 @@ define omd::site::nbp (
   $safe_name = regsubst("${site}_${name}", '[/:]', '_', 'G')
   $nbp_dir   = $::omd::site::nbp::setup::nbpdir
   $nodes_file = "${nbp_dir}/${safe_name}.yaml"
+
+  $_host_name = $host_name ? {
+    undef   => $name,
+    default => $host_name,
+  }
+  $_service_name = $service_name ? {
+    undef   => $name,
+    default => $service_name,
+  }
 
   file {$nodes_file:
     ensure => $ensure,

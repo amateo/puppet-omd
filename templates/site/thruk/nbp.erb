@@ -18,7 +18,7 @@
    "rankDir" : "TB",
    "template" : "<%= @host_template %>",
    "state_type" : "<%= @state_type %>",
-   "name" : "<%= @name %>",
+   "name" : "<%= @_host_name %>",
    "nodes" : [
       {
          "function" : "worst()",
@@ -26,7 +26,7 @@
          <%- if @service_template != '' -%>
          "template" : "<%= @service_template %>",
          <%- end -%>
-         "label" : "<%= @name %>",
+         "label" : "<%= @_service_name %>",
          "id" : "node1",
          "depends" : [
             <%= ids.collect { |x| "\"" + x + "\"" }.join(",\n            ") %>
