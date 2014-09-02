@@ -1,0 +1,19 @@
+# thruk: readonly
+# Fichero generado con puppet
+#
+define host {
+  use thruk-bp-template
+  host_name <%= @name %>
+  alias Business Process: <%= @name %>
+  _THRUK_NODE_ID node1
+  _THRUK_BP_ID <%= number %>
+}
+
+define service {
+  service_description <%= @name %>
+  use thruk-bp-node-template
+  host_name <%= @name %>
+  display_name <%= @name %>
+  _THRUK_NODE_ID node1
+  _THRUK_BP_ID <%= number %>
+}

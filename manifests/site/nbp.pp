@@ -36,4 +36,10 @@ define omd::site::nbp (
     mode    => '0660',
     content => template('omd/site/thruk/nbp.erb'),
   }
+
+  omd::site::nagios::dotconf { "bp_generated_${name}.cfg":
+    ensure  => $ensure,
+    site    => $site,
+    content => template('omd/site/thruk/nbp_nagios.erb'),
+  }
 }
