@@ -16,13 +16,16 @@
 -%>
 {
    "rankDir" : "TB",
-   "template" : "",
+   "template" : "<%= @host_template %>",
    "state_type" : "<%= @state_type %>",
    "name" : "<%= @name %>",
    "nodes" : [
       {
          "function" : "worst()",
          "create_obj" : 1,
+         <%- if @service_template != '' -%>
+         "template" : "<%= @service_template %>",
+         <%- end -%>
          "label" : "<%= @name %>",
          "id" : "node1",
          "depends" : [

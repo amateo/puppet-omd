@@ -4,6 +4,8 @@ define omd::site::nbp (
   $ensure     = 'present',
   $core       = 'nagios',
   $state_type = 'both',
+  $host_template   = '',
+  $service_template   = '',
 ) {
   validate_re($core, '^(nagios)$',
     'On nagios core is supported by now')
