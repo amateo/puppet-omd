@@ -29,7 +29,7 @@ define omd::site::nbp (
     $nodes = loadyaml($nodes_file)
   }
 
-  file {"/tmp/${number}.tbp":
+  file {"${bpdir}/${number}.tbp":
     ensure  => $ensure,
     owner   => $site,
     group   => $site,
