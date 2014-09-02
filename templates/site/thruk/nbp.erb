@@ -1,0 +1,26 @@
+<%- require 'json' -%>
+<%-
+  ids = Array.new
+  nodes_json = Array.new
+  @nodes['nodes'].each { | key, node | 
+    nodes_json += [ node.to_json ]
+    ids = ids + [ node['id'] ] }
+-%>
+{
+   "rankDir" : "TB",
+   "template" : "",
+   "state_type" : "<%= @state_type %>",
+   "name" : "<%= @name %>",
+   "nodes" : [
+      {
+         "function" : "worst()",
+         "create_obj" : 1,
+         "label" : "<%= @name %>",
+         "id" : "node1",
+         "depends" : [
+            <%= ids.collect { |x| "\"" + x + "\"" }.join(",\n            ") %>
+         ]
+      },
+      <%= nodes_json.join(",\n      ") %>
+   ]
+}
