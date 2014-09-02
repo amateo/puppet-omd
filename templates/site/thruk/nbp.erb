@@ -4,7 +4,13 @@
   nodes_json = Array.new
   if @nodes then
     @nodes['nodes'].each { | key, node | 
-      nodes_json += [ node.to_json ]
+      jsonstr = "{ "
+      jsonstr += "\"function\" : \"" + node['function'] + "\","
+      jsonstr += "\"label\" : \"" + node['label'] + "\","
+      jsonstr += "\"id\" : \"" + node['id'] + "\""
+      jsonstr += " }"
+      nodes_json += [ jsonstr ]
+
       ids = ids + [ node['id'] ] }
   end
 -%>
