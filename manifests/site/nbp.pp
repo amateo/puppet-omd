@@ -34,12 +34,12 @@ define omd::site::nbp (
     default => $service_name,
   }
 
+  File[$nodes_file] ->
+  Omd::Site::Nbp::Node{} ->
+  Omd::Site::Nagios::Dotconf["bp_generated_${name}.cfg"]
+
   file {$nodes_file:
     ensure => $ensure,
-  }
-
-  if $ensure == 'present' {
-    $nodes = loadyaml($nodes_file)
   }
 
   file {"${bpdir}/${number}.tbp":

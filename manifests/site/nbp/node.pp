@@ -2,6 +2,7 @@ define omd::site::nbp::node (
   $site,
   $target,
   $label,
+  $ensure   = 'present',
   $function = 'worst()',
   $id       = undef,
 ) {
@@ -15,6 +16,12 @@ define omd::site::nbp::node (
   $_id = $id ? {
     undef   => $name,
     default => $label,
+  }
+
+  yaml_setting {"nbp::node::${name}::ensure":
+    target => $node_file,
+    key    => "nodes/${name}/ensure",
+    value  => $ensure,
   }
 
   yaml_setting {"nbp::node::${name}::function":

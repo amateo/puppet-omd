@@ -1,17 +1,24 @@
-<%- require 'json' -%>
 <%-
+  require 'json'
+  require 'yaml'
+
   ids = Array.new
   nodes_json = Array.new
-  if @nodes then
-    @nodes['nodes'].each { | key, node | 
-      jsonstr = "{ "
-      jsonstr += "\"function\" : \"" + node['function'] + "\","
-      jsonstr += "\"label\" : \"" + node['label'] + "\","
-      jsonstr += "\"id\" : \"" + node['id'] + "\""
-      jsonstr += " }"
-      nodes_json += [ jsonstr ]
 
-      ids = ids + [ node['id'] ] }
+  nodes = YAML.load_file(@nodes_file)
+  if nodes != nil then
+    nodes['nodes'].each do | key, node |
+      if node['ensure'] == 'present' then
+        jsonstr = "{ "
+        jsonstr += "\"function\" : \"" + node['function'] + "\","
+        jsonstr += "\"label\" : \"" + node['label'] + "\","
+        jsonstr += "\"id\" : \"" + node['id'] + "\""
+        jsonstr += " }"
+        nodes_json += [ jsonstr ]
+
+        ids = ids + [ node['id'] ]
+      end
+    end
   end
 -%>
 {
