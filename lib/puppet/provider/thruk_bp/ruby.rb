@@ -38,11 +38,20 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   end
 
   def flush
+    if !@property_hash.has_key?(:nodes)
+      node = {
+        'function' => 'worst()',
+        'label'    => resource[:name],
+        'id'       => 'node1',
+      }
+      node['template'] = resource[:service_template] if resource[:service_template]
+      @property_hash[:nodes] = [ node ]
+    end
     save_to_disk
 
     # Collect the resources again once they've been changed (that way `puppet
     # resource` will show the correct values after changes have been made).
-    @property_hash = self.class.load_from_file(@property_hash[:file])
+    @property_hash = self.class.load_from_file(@property_hash[:target])
   end
 
 
@@ -54,23 +63,25 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   def to_hash
     hash = Hash.new
     hash['rankDir'] = 'TB'
-    hash['template'] = ''
     hash['state_type'] = resource[:state_type]
-    hash['name'] = resource[:name]
-    hash['template'] = resource[:host_template]
-
+    #hash['name'] = resource[:name]
+    hash['name'] = resource[:host_name]
+    hash['template'] = resource[:host_template] if resource[:host_template]
+    hash['nodes'] = @property_hash[:nodes] if @property_hash[:nodes]
     return hash
   end
 
   def get_filename
-    if @property_hash.has_key?(:file)
-      return @property_hash[:file]
+    if @property_hash.has_key?(:target)
+      return @property_hash[:target]
     else
-      files = Dir['/tmp/bp_maps/*.tbp'].collect! do |x|
+      dir = '/omd/sites/' + resource[:site] + '/etc/thruk/bp'
+      raise Puppet::Error, 'Directory ' + dir + ' does not exists!!!' if !File.directory?(dir)
+      files = Dir[dir + '/*.tbp'].collect! do |x|
         x = File.basename(x).split('.')[0]
       end
-      @property_hash[:file] = '/tmp/bp_maps/' + (files.sort[files.length-1].to_i + 1).to_s + '.tbp'
-      return @property_hash[:file]
+      @property_hash[:target] = dir + '/' + (files.sort[files.length-1].to_i + 1).to_s + '.tbp'
+      return @property_hash[:target]
     end
   end
 
@@ -80,8 +91,13 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   #
 
   def self.get_files
-    return Array.new unless File.directory?('/tmp/bp_maps')
-    return Dir['/tmp/bp_maps/*.tbp']
+    files = Array.new
+    Dir['/omd/sites/*'].each do |d|
+      if File.directory?(d + '/etc/thruk/bp')
+        files += Dir[d + '/etc/thruk/bp/*.tbp']
+      end
+    end
+    return files
   end
 
   def self.load_from_file(filename)
@@ -91,8 +107,11 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       hash[:ensure] = :present
       hash[:host_template] = hash_tmp['template']
       hash[:state_type] = hash_tmp['state_type']
-      hash[:name] = hash_tmp['name']
-      hash[:file] = filename
+      hash[:name] = hash_tmp['nodes'][0]['label']
+      hash[:target] = filename
+      hash[:site] = filename.split('/')[3]
+      hash[:nodes] = hash_tmp['nodes']
+      hash[:host_name] = hash_tmp['name']
       return hash
     else
       return nil
@@ -100,8 +119,9 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   end
 
   def save_to_disk
+    raise Puppet::Error, 'You must provide a site paramater' if !resource[:site]
     if @property_flush[:ensure] == :absent
-      File.delete(@property_hash[:file])
+      File.delete(@property_hash[:target])
     else
       file = File.open(get_filename, 'w')
       JSON.dump(to_hash, file)
