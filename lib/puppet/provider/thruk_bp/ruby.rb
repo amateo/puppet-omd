@@ -1,4 +1,5 @@
 require 'json'
+require 'yaml'
 
 Puppet::Type.type(:thruk_bp).provide(:ruby) do
   defaultfor :osfamily => :debian
@@ -38,15 +39,6 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   end
 
   def flush
-    if !@property_hash.has_key?(:nodes)
-      node = {
-        'function' => 'worst()',
-        'label'    => resource[:name],
-        'id'       => 'node1',
-      }
-      node['template'] = resource[:service_template] if resource[:service_template]
-      @property_hash[:nodes] = [ node ]
-    end
     save_to_disk
 
     # Collect the resources again once they've been changed (that way `puppet
@@ -64,10 +56,19 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
     hash = Hash.new
     hash['rankDir'] = 'TB'
     hash['state_type'] = resource[:state_type]
-    #hash['name'] = resource[:name]
     hash['name'] = resource[:host_name]
     hash['template'] = resource[:host_template] if resource[:host_template]
-    hash['nodes'] = @property_hash[:nodes] if @property_hash[:nodes]
+    if @property_hash.has_key?(:nodes)
+      hash['nodes'] = @property_hash[:nodes]
+    else
+      node = {
+        'function' => 'worst()',
+        'label'    => resource[:name],
+        'id'       => 'node1',
+      }
+      node['template'] = resource[:service_template] if resource[:service_template]
+      hash['nodes'] = [ node ]
+    end
     return hash
   end
 
