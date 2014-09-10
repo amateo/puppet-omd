@@ -55,7 +55,7 @@ Puppet::Type.newtype(:thruk_bp_node) do
 
   newproperty(:function) do
     desc "function"
-    defaultto { 'worst' }
+    defaultto { "fixed('OK')" }
   end
 
   newparam(:target) do

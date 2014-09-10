@@ -65,13 +65,14 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
     return nil if !json.has_key?('nodes')
     nodes = json['nodes']
     nodes.collect do |node|
-      node[:ensure] = :present
-      node[:site]   = site
-      node[:bp]     = nodes[0]['label']
-      node[:name]   = site + '/' + node[:bp] + '/' + node['id']
-      node[:target] = filename
-      node[:id]     = node['id']
-      node[:label]  = node['label'] if node['label']
+      node[:ensure]   = :present
+      node[:site]     = site
+      node[:bp]       = nodes[0]['label']
+      node[:name]     = site + '/' + node[:bp] + '/' + node['id']
+      node[:target]   = filename
+      node[:id]       = node['id']
+      node[:label]    = node['label'] if node['label']
+      node[:function] = node['function'] if node['function']
       # Buscamos si algún otro nodo depende de este
       nodes.each do |node2|
         if node2['depends'] and node2['depends'].include?(node['id'])
@@ -87,7 +88,6 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
     raise Puppet::Error, 'You must provide a site parameter' if !resource[:site]
     # Load JSON file
     filename = resource[:target] ? @property_hash[:target] : get_filename
-    warning('save_to_disk file: ' + (filename ? filename : 'nil'))
     if !filename
       raise Puppet::Error, "Can't find BP for " + resource[:name]
     end
@@ -108,22 +108,24 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
         nodes.delete_at(index)
       end
     else
-      warning('save_to_disk: present')
       # Busco el nodo...
       updated = false
+      updated_parent = false
       nodes.each do |node|
-        warning('save_to_disk: Checking node ' + node['id'] + '(' + resource[:id] + ')')
         if node['id'] == resource[:id]
-          warning('save_to_disk: Updating node ' + node.inspect)
           node['label'] = resource[:label]
           node['function'] = resource[:function]
           updated = true
-        end
-        if node['id'] == resource[:parent]
-          if node['depends']
-            node['depends'].push(resource[:id])
+        else
+          if node['id'] == resource[:parent]
+            if node['depends']
+              node['depends'].push(resource[:id]) if !node['depends'].include?(resource[:id])
+            else
+              node['depends'] = [ resource[:id] ]
+            end
+            updated_parent = true
           else
-            node['depends'] = [ resource[:id] ]
+            node['depends'].delete(resource[:id]) if node['depends']
           end
         end
       end
@@ -135,9 +137,10 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
           'function' => resource[:function]
         } )
       end
+      warning('No parent found for ' + resource[:id] + ' BP node') if !updated_parent
     end
-    file = File.open(filename, 'w')
     #file = File.open('/tmp/kk.tbp', 'w')
+    file = File.open(filename, 'w')
     file.write(JSON.pretty_generate(json))
     file.close
   end
