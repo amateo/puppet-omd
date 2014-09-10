@@ -125,7 +125,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       File.delete(@property_hash[:target])
     else
       file = File.open(get_filename, 'w')
-      JSON.dump(to_hash, file)
+      file.write(JSON.pretty_generate(to_hash))
       file.close
     end
   end
