@@ -51,6 +51,7 @@ Puppet::Type.newtype(:thruk_bp_node) do
 
   newproperty(:parent) do
     desc "parent"
+    defaultto { 'node1' }
   end
 
   newproperty(:function) do
