@@ -188,5 +188,8 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
 
     aug.save
     aug.close
+
+    # Reload nagios
+    system('/usr/bin/omd reload  ' + resource[:site] + ' nagios')
   end
 end
