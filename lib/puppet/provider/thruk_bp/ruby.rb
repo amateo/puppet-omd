@@ -163,23 +163,28 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
         end
       end
     end
-    aug_host_path = host_entry ?
-      host_entry : '/files' + path + '/host[' + (last_host + 1).to_s + ']'
-    aug_service_path = service_entry ?
-      service_entry : '/files' + path + '/service[' + (last_service + 1).to_s + ']'
-    host_template = resource[:host_template] ? resource[:host_template] : 'thruk-bp-template'
-    service_template = resource[:service_template] ? resource[:service_template] : 'thruk-bp-node-template'
-    aug.set(aug_host_path + '/use', host_template)
-    aug.set(aug_host_path + '/host_name', resource[:host_name])
-    aug.set(aug_host_path + '/alias', 'Business Process: ' + resource[:host_name])
-    aug.set(aug_host_path + '/_THRUK_BP_ID', bp_id)
-    aug.set(aug_host_path + '/_THRUK_NODE_ID', 'node1')
-    aug.set(aug_service_path + '/use', service_template)
-    aug.set(aug_service_path + '/host_name', resource[:host_name])
-    aug.set(aug_service_path + '/service_description', resource[:name])
-    aug.set(aug_service_path + '/display_name', resource[:name])
-    aug.set(aug_service_path + '/_THRUK_BP_ID', bp_id)
-    aug.set(aug_service_path + '/_THRUK_NODE_ID', 'node1')
+    if @property_flush[:ensure] == :absent
+      aug.rm(host_entry) if host_entry
+      aug.rm(service_entry) if service_entry
+    else
+      aug_host_path = host_entry ?
+        host_entry : '/files' + path + '/host[' + (last_host + 1).to_s + ']'
+      aug_service_path = service_entry ?
+        service_entry : '/files' + path + '/service[' + (last_service + 1).to_s + ']'
+      host_template = resource[:host_template] ? resource[:host_template] : 'thruk-bp-template'
+      service_template = resource[:service_template] ? resource[:service_template] : 'thruk-bp-node-template'
+      aug.set(aug_host_path + '/use', host_template)
+      aug.set(aug_host_path + '/host_name', resource[:host_name])
+      aug.set(aug_host_path + '/alias', 'Business Process: ' + resource[:host_name])
+      aug.set(aug_host_path + '/_THRUK_BP_ID', bp_id)
+      aug.set(aug_host_path + '/_THRUK_NODE_ID', 'node1')
+      aug.set(aug_service_path + '/use', service_template)
+      aug.set(aug_service_path + '/host_name', resource[:host_name])
+      aug.set(aug_service_path + '/service_description', resource[:name])
+      aug.set(aug_service_path + '/display_name', resource[:name])
+      aug.set(aug_service_path + '/_THRUK_BP_ID', bp_id)
+      aug.set(aug_service_path + '/_THRUK_NODE_ID', 'node1')
+    end
 
     aug.save
     aug.close
