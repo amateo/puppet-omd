@@ -40,6 +40,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
 
   def flush
     save_to_disk
+    save_nagios_objects
 
     # Collect the resources again once they've been changed (that way `puppet
     # resource` will show the correct values after changes have been made).
@@ -128,5 +129,58 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       file.write(JSON.pretty_generate(to_hash))
       file.close
     end
+  end
+
+  def save_nagios_objects
+    # Abrimos el fichero con augeas
+    path = '/omd/sites/' + resource[:site] + '/etc/nagios/conf.d/thruk_bp_generated.cfg'
+    aug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    aug.transform(:lens => "nagiosobjects.lns", :incl => path)
+    aug.load
+
+    if match = get_filename.match(/^.+\/([^\/]+)\.tbp/)
+      bp_id = match[1]
+    end
+    host_entry = nil
+    service_entry = nil
+    last_host = 0
+    last_service = 0
+    aug.match('/files/' + path + '/*').each do |entry|
+      if match = entry.match(/^.+\/host\[(\d+)\]$/)
+        host_number = match[1].to_i
+        last_host = host_number if host_number > last_host
+        entry_id = aug.get(entry + '/_THRUK_BP_ID')
+        if entry_id == bp_id
+          host_entry = entry
+        end
+      elsif match = entry.match(/^.+\/service\[(\d+)\]$/)
+        service_number = match[1].to_i
+        last_service = service_number if service_number > last_service
+        entry_id = aug.get(entry + '/_THRUK_BP_ID')
+        if entry_id == bp_id
+          service_entry = entry
+        end
+      end
+    end
+    aug_host_path = host_entry ?
+      host_entry : '/files' + path + '/host[' + (last_host + 1).to_s + ']'
+    aug_service_path = service_entry ?
+      service_entry : '/files' + path + '/service[' + (last_service + 1).to_s + ']'
+    host_template = resource[:host_template] ? resource[:host_template] : 'thruk-bp-template'
+    service_template = resource[:service_template] ? resource[:service_template] : 'thruk-bp-node-template'
+    aug.set(aug_host_path + '/use', host_template)
+    aug.set(aug_host_path + '/host_name', resource[:host_name])
+    aug.set(aug_host_path + '/alias', 'Business Process: ' + resource[:host_name])
+    aug.set(aug_host_path + '/_THRUK_BP_ID', bp_id)
+    aug.set(aug_host_path + '/_THRUK_NODE_ID', 'node1')
+    aug.set(aug_service_path + '/use', service_template)
+    aug.set(aug_service_path + '/host_name', resource[:host_name])
+    aug.set(aug_service_path + '/service_description', resource[:name])
+    aug.set(aug_service_path + '/display_name', resource[:name])
+    aug.set(aug_service_path + '/_THRUK_BP_ID', bp_id)
+    aug.set(aug_service_path + '/_THRUK_NODE_ID', 'node1')
+
+    aug.save
+    aug.close
   end
 end
