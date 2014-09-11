@@ -49,6 +49,11 @@ Puppet::Type.newtype(:thruk_bp) do
     defaultto { @resource[:name] }
   end
 
+  newproperty(:function) do
+    desc 'Function to use in the main node of the BP'
+    defaultto { 'worst()' }
+  end
+
   newparam(:target) do
     desc 'The file to store the BP definition'
   end

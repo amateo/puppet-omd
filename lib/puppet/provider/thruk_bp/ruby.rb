@@ -63,7 +63,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       hash['nodes'] = @property_hash[:nodes]
     else
       node = {
-        'function' => 'worst()',
+        'function' => resource[:function],
         'label'    => resource[:name],
         'id'       => 'node1',
       }
@@ -110,6 +110,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       hash[:host_template] = hash_tmp['template']
       hash[:state_type] = hash_tmp['state_type']
       hash[:name] = hash_tmp['nodes'][0]['label']
+      hash[:function] = hash_tmp['nodes'][0]['function']
       hash[:target] = filename
       hash[:site] = filename.split('/')[3]
       hash[:nodes] = hash_tmp['nodes']
