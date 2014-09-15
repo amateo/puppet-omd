@@ -41,6 +41,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   def flush
     save_to_disk
     save_nagios_objects
+    ensure_cron
 
     # Collect the resources again once they've been changed (that way `puppet
     # resource` will show the correct values after changes have been made).
@@ -191,5 +192,45 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
 
     # Reload nagios
     system('/usr/bin/omd reload  ' + resource[:site] + ' nagios')
+  end
+
+  def ensure_cron
+    path = '/omd/sites/' + resource[:site] + '/etc/cron.d/thruk.auto'
+    changed = false
+    if File.zero?(path)
+      file = File.open(path, 'w')
+      file.puts('# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN')
+      file.puts('##############################################################')
+      file.puts('# business process')
+      file.puts("* * * * * cd /opt/omd/versions/1.10/share/thruk && /bin/bash -l -c '/omd/sites/telematica/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/telematica/var/thruk/cron.log")
+      file.puts('##############################################################')
+      file.puts('# END OF THRUK')
+      file.close
+      changed = true
+    else
+      first_mark = false
+      file = File.open(path, 'r+')
+      file.each do |line|
+        if line.match(/^#+$/)
+          if !first_mark
+            first_mark = true
+          else
+            # Hemos llegado a la marca de fin, tenemos
+            # que crear la entrada
+            length = 0 - line.length
+            file.seek length, IO::SEEK_CUR
+            file.puts('# business process')
+            file.puts("* * * * * cd /opt/omd/versions/1.10/share/thruk && /bin/bash -l -c '/omd/sites/telematica/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/telematica/var/thruk/cron.log")
+            file.puts('##############################################################')
+            file.puts('# END OF THRUK')
+            changed = true
+          end
+        elsif line.match(/^# business process$/)
+          break
+        end
+      end
+      file.close
+    end
+    system('/usr/bin/omd reload ' + resource[:site] + ' crontab') if changed == true
   end
 end
