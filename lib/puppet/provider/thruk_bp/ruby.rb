@@ -148,15 +148,15 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
     last_host = 0
     last_service = 0
     aug.match('/files/' + path + '/*').each do |entry|
-      if match = entry.match(/^.+\/host\[(\d+)\]$/)
-        host_number = match[1].to_i
+      if entry.match(/^.+\/host(\[\d+\])?$/)
+        host_number = (match = entry.match(/^.+\/host\[(\d+)\]$/)) ? match[1].to_i : 1
         last_host = host_number if host_number > last_host
         entry_id = aug.get(entry + '/_THRUK_BP_ID')
         if entry_id == bp_id
           host_entry = entry
         end
-      elsif match = entry.match(/^.+\/service\[(\d+)\]$/)
-        service_number = match[1].to_i
+      elsif entry.match(/^.+\/service(\[\d+\])?$/)
+        service_number = (match = entry.match(/^.+\/service\[(\d+)\]$/)) ? match[1].to_i : 1
         last_service = service_number if service_number > last_service
         entry_id = aug.get(entry + '/_THRUK_BP_ID')
         if entry_id == bp_id
@@ -174,6 +174,8 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
         service_entry : '/files' + path + '/service[' + (last_service + 1).to_s + ']'
       host_template = resource[:host_template] ? resource[:host_template] : 'thruk-bp-template'
       service_template = resource[:service_template] ? resource[:service_template] : 'thruk-bp-node-template'
+      warning('Modificando host: ' + aug_host_path)
+      warning('Modificando service: ' + aug_service_path)
       aug.set(aug_host_path + '/use', host_template)
       aug.set(aug_host_path + '/host_name', resource[:host_name])
       aug.set(aug_host_path + '/alias', 'Business Process: ' + resource[:host_name])
