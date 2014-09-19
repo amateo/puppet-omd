@@ -174,8 +174,6 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
         service_entry : '/files' + path + '/service[' + (last_service + 1).to_s + ']'
       host_template = resource[:host_template] ? resource[:host_template] : 'thruk-bp-template'
       service_template = resource[:service_template] ? resource[:service_template] : 'thruk-bp-node-template'
-      warning('Modificando host: ' + aug_host_path)
-      warning('Modificando service: ' + aug_service_path)
       aug.set(aug_host_path + '/use', host_template)
       aug.set(aug_host_path + '/host_name', resource[:host_name])
       aug.set(aug_host_path + '/alias', 'Business Process: ' + resource[:host_name])
