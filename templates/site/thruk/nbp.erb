@@ -1,0 +1,44 @@
+<%-
+  require 'json'
+  require 'yaml'
+
+  ids = Array.new
+  nodes_json = Array.new
+
+  nodes = YAML.load_file(@nodes_file)
+  if nodes != nil then
+    nodes['nodes'].each do | key, node |
+      if node['ensure'] == 'present' then
+        jsonstr = "{ "
+        jsonstr += "\"function\" : \"" + node['function'] + "\","
+        jsonstr += "\"label\" : \"" + node['label'] + "\","
+        jsonstr += "\"id\" : \"" + node['id'] + "\""
+        jsonstr += " }"
+        nodes_json += [ jsonstr ]
+
+        ids = ids + [ node['id'] ]
+      end
+    end
+  end
+-%>
+{
+   "rankDir" : "TB",
+   "template" : "<%= @host_template %>",
+   "state_type" : "<%= @state_type %>",
+   "name" : "<%= @_host_name %>",
+   "nodes" : [
+      {
+         "function" : "worst()",
+         "create_obj" : 1,
+         <%- if @service_template != '' -%>
+         "template" : "<%= @service_template %>",
+         <%- end -%>
+         "label" : "<%= @_service_name %>",
+         "id" : "node1",
+         "depends" : [
+            <%= ids.collect { |x| "\"" + x + "\"" }.join(",\n            ") %>
+         ]
+      },
+      <%= nodes_json.join(",\n      ") %>
+   ]
+}
