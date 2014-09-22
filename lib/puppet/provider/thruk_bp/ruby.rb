@@ -83,7 +83,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       files = Dir[dir + '/*.tbp'].collect! do |x|
         x = File.basename(x).split('.')[0]
       end
-      @property_hash[:target] = dir + '/' + (files.sort[files.length-1].to_i + 1).to_s + '.tbp'
+      @property_hash[:target] = dir + '/' + (files.sort_by(&:to_i)[files.length-1].to_i + 1).to_s + '.tbp'
       return @property_hash[:target]
     end
   end
