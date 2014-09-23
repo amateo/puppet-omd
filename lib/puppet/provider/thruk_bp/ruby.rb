@@ -62,11 +62,18 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
     hash['template'] = resource[:host_template] if resource[:host_template]
     if @property_hash.has_key?(:nodes)
       hash['nodes'] = @property_hash[:nodes]
+      hash['nodes'].collect! do |node|
+        if node['id'] == 'node1'
+          node['template'] = resource[:service_template] if resource[:service_template]
+          node
+        end
+      end
     else
       node = {
         'function' => resource[:function],
         'label'    => resource[:name],
         'id'       => 'node1',
+        'template' => resource[:service_template],
       }
       node['template'] = resource[:service_template] if resource[:service_template]
       hash['nodes'] = [ node ]
@@ -116,6 +123,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       hash[:site] = filename.split('/')[3]
       hash[:nodes] = hash_tmp['nodes']
       hash[:host_name] = hash_tmp['name']
+      hash[:service_template] = hash_tmp['nodes'][0]['template'] if hash_tmp['nodes'][0].has_key?('template')
       return hash
     else
       return nil
