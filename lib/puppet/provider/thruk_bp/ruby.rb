@@ -210,7 +210,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       file.puts('# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN')
       file.puts('##############################################################')
       file.puts('# business process')
-      file.puts("* * * * * cd /opt/omd/versions/1.10/share/thruk && /bin/bash -l -c '/omd/sites/telematica/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/telematica/var/thruk/cron.log")
+      file.puts("* * * * * cd /opt/omd/versions/1.10/share/thruk && /bin/bash -l -c '/omd/sites/" + resource[:site] + "/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/" + resource[:site] + "/var/thruk/cron.log")
       file.puts('##############################################################')
       file.puts('# END OF THRUK')
       file.close
@@ -228,7 +228,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
             length = 0 - line.length
             file.seek length, IO::SEEK_CUR
             file.puts('# business process')
-            file.puts("* * * * * cd /opt/omd/versions/1.10/share/thruk && /bin/bash -l -c '/omd/sites/telematica/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/telematica/var/thruk/cron.log")
+            file.puts("* * * * * cd /opt/omd/versions/1.10/share/thruk && /bin/bash -l -c '/omd/sites/" + resource[:site] + "/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/" + resource[:site] + "/var/thruk/cron.log")
             file.puts('##############################################################')
             file.puts('# END OF THRUK')
             changed = true

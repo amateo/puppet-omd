@@ -1,0 +1,21 @@
+# Nagios main configuration file
+#
+# Fichero generado con puppet
+
+# This file will be read in after the files in nagios.d.
+# Variables you set here will override settings in those
+# files. Better do not edit the files in nagios.d but rather
+# copy variables from there to here. That will save you
+# trouble when updating your sites to new versions.
+
+<%- if @nagios_options %>
+  <%- if @nagios_options.is_a?(Hash) -%>
+    <%- @nagios_options.sort.each do |key, value| -%>
+<%= key %>=<%= value %>
+    <%- end -%>
+  <%- elsif @nagios_options.respond_to?('join') -%>
+<%= @nagios_options.join("\n") %>
+  <%- else -%>
+<%= @nagios_options %>
+  <%- end -%>
+<%- end -%>
