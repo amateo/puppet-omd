@@ -42,6 +42,7 @@ define omd::site (
   $livestatus     = 'off',
   $livestatus_port = undef,
   $livestatus_peers = undef,
+  $nagios_options   = undef,
 ) {
   # Validación
   validate_re($ensure, '^(present|absent)$',
@@ -99,6 +100,7 @@ define omd::site (
     livestatus       => $livestatus,
     livestatus_port  => $livestatus_port,
     livestatus_peers => $livestatus_peers,
+    nagios_options   => $nagios_options,
   } ~>
   ::omd::site::service {$name:
     ensure => $ensure,

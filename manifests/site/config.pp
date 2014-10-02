@@ -10,6 +10,7 @@ define omd::site::config (
   $livestatus     = 'off',
   $livestatus_port = 6557,
   $livestatus_peers = undef,
+  $nagios_options   = undef,
 ) {
 
   if $livestatus_peers {
@@ -171,6 +172,14 @@ define omd::site::config (
     group   => $sitename,
     mode    => '0644',
     content => template('omd/site/nagios/cgi.cfg.erb'),
+  }
+
+  file {"${sitedir}/etc/nagios/nagios.cfg":
+    ensure  => $ensure,
+    owner   => $sitename,
+    group   => $sitename,
+    mode    => '0644',
+    content => template('omd/site/nagios/nagios.cfg.erb'),
   }
 
   file {"${sitedir}/etc/shinken/cgi.cfg":
