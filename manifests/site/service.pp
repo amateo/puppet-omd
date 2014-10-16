@@ -18,7 +18,7 @@ define omd::site::service (
       enable     => $_service_enabled,
       hasrestart => true,
       hasstatus  => true,
-      restart    => "/usr/bin/omd restart ${site}",
+      restart    => "/usr/bin/omd reload ${site}",
       start      => "/usr/bin/omd start ${site}",
       status     => "/usr/bin/omd status ${site}",
       stop       => "/usr/bin/omd stop ${site}",
