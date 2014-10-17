@@ -26,6 +26,11 @@ define omd::site::config (
     default  => 'link',
   }
 
+  $cgi_cfg_target = $core ? {
+    nagios  => '../nagios/cgi.cfg',
+    default => '../nagios/cgi.cfg',
+  }
+
   #
   # Configuración del apache, dependiendo del modo
   #
@@ -204,6 +209,13 @@ define omd::site::config (
     group   => $sitename,
     mode    => '0644',
     content => template('omd/site/pnp4nagios/config.php.erb'),
+  }
+
+  file {"${sitedir}/etc/thruk/cgi.cfg":
+    ensure => $_link_ensure,
+    owner  => $sitename,
+    group  => $sitename,
+    target => $cgi_cfg_target,
   }
 
   if $ensure == 'present' {
