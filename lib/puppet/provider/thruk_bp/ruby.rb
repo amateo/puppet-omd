@@ -204,13 +204,14 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
 
   def ensure_cron
     path = '/omd/sites/' + resource[:site] + '/etc/cron.d/thruk.auto'
+    version = get_site_version
     changed = false
     if File.zero?(path)
       file = File.open(path, 'w')
       file.puts('# THIS PART IS WRITTEN BY THRUK, CHANGES WILL BE OVERWRITTEN')
       file.puts('##############################################################')
       file.puts('# business process')
-      file.puts("* * * * * cd /opt/omd/versions/1.10/share/thruk && /bin/bash -l -c '/omd/sites/" + resource[:site] + "/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/" + resource[:site] + "/var/thruk/cron.log")
+      file.puts("* * * * * cd /opt/omd/versions/" + version + "/share/thruk && /bin/bash -l -c '/omd/sites/" + resource[:site] + "/bin/thruk -a bpd' >/dev/null 2>>/omd/sites/" + resource[:site] + "/var/thruk/cron.log")
       file.puts('##############################################################')
       file.puts('# END OF THRUK')
       file.close
@@ -240,5 +241,15 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       file.close
     end
     system('/usr/bin/omd reload ' + resource[:site] + ' crontab') if changed == true
+  end
+
+  def get_site_version
+    command = '/usr/bin/omd version ' + resource[:site]
+    output = `#{command}`
+    if match = output.match(/^OMD - Open Monitoring Distribution Version (\d+\.\d+)$/)
+      return match[1]
+    else
+      return 'default'
+    end
   end
 end
