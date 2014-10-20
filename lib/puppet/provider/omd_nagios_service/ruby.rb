@@ -10,7 +10,7 @@ Puppet::Type.type(:omd_nagios_service).provide(:ruby) do
   end
 
   def destroy
-    @property_flush[:ensure] == :absent
+    @property_flush[:ensure] = :absent
   end
 
   def create
