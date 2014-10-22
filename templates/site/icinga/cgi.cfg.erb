@@ -164,8 +164,8 @@ use_ssl_authentication=0
 # with Icinga 1.5.0
 
 authorized_for_system_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
-<%- if @admin_groups -%>
-authorized_contactgroup_for_system_information=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- if @admin_contactgroups -%>
+authorized_contactgroup_for_system_information=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
 #authorized_contactgroup_for_system_information=
 <%- end -%>
@@ -182,8 +182,8 @@ authorized_contactgroup_for_system_information=<%= @admin_groups.respond_to?('jo
 # with Icinga 1.5.0
 
 authorized_for_configuration_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
-<%- if @admin_groups -%>
-authorized_contactgroup_for_configuration_information=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- if @admin_contactgroups -%>
+authorized_contactgroup_for_configuration_information=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
 #authorized_contactgroup_for_configuration_information=
 <%- end -%>
@@ -199,8 +199,8 @@ authorized_contactgroup_for_configuration_information=<%= @admin_groups.respond_
 # Alternatively you can specify contactgroups too.
 
 authorized_for_full_command_resolution=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
-<%- if @admin_groups -%>
-authorized_contactgroup_for_full_command_resolution=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- if @admin_contactgroups -%>
+authorized_contactgroup_for_full_command_resolution=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
 #authorized_contactgroup_for_full_command_resolution=
 <%- end -%>
@@ -218,8 +218,8 @@ authorized_contactgroup_for_full_command_resolution=<%= @admin_groups.respond_to
 # with Icinga 1.5.0
 
 authorized_for_system_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
-<%- if @admin_groups -%>
-authorized_contactgroup_for_system_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- if @admin_contactgroups -%>
+authorized_contactgroup_for_system_commands=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
 #authorized_contactgroup_for_system_commands=
 <%- end -%>
@@ -238,9 +238,9 @@ authorized_contactgroup_for_system_commands=<%= @admin_groups.respond_to?('join'
 
 authorized_for_all_services=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 authorized_for_all_hosts=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
-<%- if @admin_groups -%>
-authorized_contactgroup_for_all_services=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_all_hosts=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- if @admin_contactgroups -%>
+authorized_contactgroup_for_all_services=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_all_hosts=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
 #authorized_contactgroup_for_all_services=
 #authorized_contactgroup_for_all_hosts=
@@ -260,9 +260,9 @@ authorized_contactgroup_for_all_hosts=<%= @admin_groups.respond_to?('join') ? @a
 
 authorized_for_all_service_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 authorized_for_all_host_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
-<%- if @admin_groups -%>
-authorized_contactgroup_for_all_service_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_all_host_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- if @admin_contactgroups -%>
+authorized_contactgroup_for_all_service_commands=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_all_host_commands=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
 #authorized_contactgroup_for_all_service_commands=
 #authorized_contactgroup_for_all_host_commands=
