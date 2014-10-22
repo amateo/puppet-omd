@@ -141,14 +141,14 @@ authorized_for_all_hosts=<%= @admin_users.respond_to?('join') ? @admin_users.joi
 authorized_for_all_service_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 authorized_for_all_host_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 
-<%- if @admin_groups -%>
-  authorized_contactgroup_for_all_hosts=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_system_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_all_services=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_all_host_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_system_information=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_all_service_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
-authorized_contactgroup_for_configuration_information=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- if @admin_contactgroups -%>
+  authorized_contactgroup_for_all_hosts=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_system_commands=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_all_services=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_all_host_commands=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_system_information=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_all_service_commands=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
+authorized_contactgroup_for_configuration_information=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- end -%>
 
 
