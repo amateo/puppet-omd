@@ -164,7 +164,11 @@ use_ssl_authentication=0
 # with Icinga 1.5.0
 
 authorized_for_system_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%- if @admin_groups -%>
+authorized_contactgroup_for_system_information=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- else -%>
 #authorized_contactgroup_for_system_information=
+<%- end -%>
 
 
 # CONFIGURATION INFORMATION ACCESS
@@ -178,7 +182,11 @@ authorized_for_system_information=<%= @admin_users.respond_to?('join') ? @admin_
 # with Icinga 1.5.0
 
 authorized_for_configuration_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%- if @admin_groups -%>
+authorized_contactgroup_for_configuration_information=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- else -%>
 #authorized_contactgroup_for_configuration_information=
+<%- end -%>
 
 
 # RAW COMMANDLINE CONFIGURATION INFORMATION ACCESS
@@ -191,7 +199,11 @@ authorized_for_configuration_information=<%= @admin_users.respond_to?('join') ? 
 # Alternatively you can specify contactgroups too.
 
 authorized_for_full_command_resolution=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%- if @admin_groups -%>
+authorized_contactgroup_for_full_command_resolution=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- else -%>
 #authorized_contactgroup_for_full_command_resolution=
+<%- end -%>
 
 
 # SYSTEM/PROCESS COMMAND ACCESS
@@ -206,7 +218,11 @@ authorized_for_full_command_resolution=<%= @admin_users.respond_to?('join') ? @a
 # with Icinga 1.5.0
 
 authorized_for_system_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%- if @admin_groups -%>
+authorized_contactgroup_for_system_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- else -%>
 #authorized_contactgroup_for_system_commands=
+<%- end -%>
 
 
 # GLOBAL HOST/SERVICE VIEW ACCESS
@@ -222,8 +238,13 @@ authorized_for_system_commands=<%= @admin_users.respond_to?('join') ? @admin_use
 
 authorized_for_all_services=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 authorized_for_all_hosts=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%- if @admin_groups -%>
+authorized_contactgroup_for_all_services=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+authorized_contactgroup_for_all_hosts=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- else -%>
 #authorized_contactgroup_for_all_services=
 #authorized_contactgroup_for_all_hosts=
+<%- end -%>
 
 
 # GLOBAL HOST/SERVICE COMMAND ACCESS
@@ -239,8 +260,13 @@ authorized_for_all_hosts=<%= @admin_users.respond_to?('join') ? @admin_users.joi
 
 authorized_for_all_service_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 authorized_for_all_host_commands=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%- if @admin_groups -%>
+authorized_contactgroup_for_all_service_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+authorized_contactgroup_for_all_host_commands=<%= @admin_groups.respond_to?('join') ? @admin_groups.join(',') : @admin_groups %>
+<%- else -%>
 #authorized_contactgroup_for_all_service_commands=
 #authorized_contactgroup_for_all_host_commands=
+<%- end -%>
 
 
 # READ-ONLY USERS

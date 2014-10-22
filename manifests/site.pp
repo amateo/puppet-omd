@@ -31,16 +31,17 @@
 #   User of array of users with administration privileges.
 #
 define omd::site (
-  $site           = '',
-  $ensure         = 'present',
-  $mode           = 'own',
-  $defaultgui     = 'welcome',
-  $core           = 'nagios',
-  $auth_options   = '',
-  $apache_modules = [],
-  $admin_users    = 'omdadmin',
-  $livestatus     = 'off',
-  $livestatus_port = undef,
+  $site             = '',
+  $ensure           = 'present',
+  $mode             = 'own',
+  $defaultgui       = 'welcome',
+  $core             = 'nagios',
+  $auth_options     = '',
+  $apache_modules   = [],
+  $admin_users      = 'omdadmin',
+  $admin_groups     = undef,
+  $livestatus       = 'off',
+  $livestatus_port  = undef,
   $livestatus_peers = undef,
   $nagios_options   = undef,
 ) {
@@ -63,6 +64,10 @@ define omd::site (
   validate_array($apache_modules)
 
   if !is_array($admin_users) and !is_string($admin_users) {
+    fail('admin_user parameter must be a String or Array of Strings')
+  }
+
+  if !is_array($admin_groups) and !is_string($admin_groups) {
     fail('admin_user parameter must be a String or Array of Strings')
   }
 
@@ -96,6 +101,7 @@ define omd::site (
     core             => $core,
     auth_options     => $auth_options,
     admin_users      => $admin_users,
+    admin_groups     => $admin_groups,
     apache_modules   => $apache_modules,
     livestatus       => $livestatus,
     livestatus_port  => $livestatus_port,
