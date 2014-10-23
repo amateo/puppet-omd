@@ -66,6 +66,8 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
         if node['id'] == 'node1'
           node['template'] = resource[:service_template] if resource[:service_template]
           node
+        else
+          node
         end
       end
     else
