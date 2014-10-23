@@ -56,7 +56,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   
   def to_hash
     hash = Hash.new
-    hash['rankDir'] = 'TB'
+    hash['rankDir'] = resource[:rank_dir]
     hash['state_type'] = resource[:state_type]
     hash['name'] = resource[:host_name]
     hash['template'] = resource[:host_template] if resource[:host_template]
@@ -115,6 +115,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       hash_tmp = JSON.load(File.read(filename))
       hash = Hash.new
       hash[:ensure] = :present
+      hash[:rank_dir] = hash_tmp['rankDir']
       hash[:host_template] = hash_tmp['template']
       hash[:state_type] = hash_tmp['state_type']
       hash[:name] = hash_tmp['nodes'][0]['label']
