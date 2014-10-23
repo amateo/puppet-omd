@@ -54,6 +54,12 @@ Puppet::Type.newtype(:thruk_bp) do
     defaultto { 'worst()' }
   end
 
+  newproperty(:rank_dir) do
+    desc 'Graph direction. Valid values are TB (Top-Bottom) and LR (Left-Right)'
+    newvalues(:TB, :LR)
+    defaultto(:TB)
+  end
+
   newparam(:target) do
     desc 'The file to store the BP definition'
   end
