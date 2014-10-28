@@ -149,6 +149,18 @@ Puppet::Type.type(:omd_nagios_host).provide(:ruby) do
     aug.transform(:lens => 'nagiosobjects.lns', :incl => filename)
     aug.load
 
+    # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
+    # Si no, volvemos a buscar la entrada augeas que corresponde.
+    # Hay que hacer esto porque otros borrados de elementos pueden
+    # haber cambiado la posición de éste (TLM-784)
+    if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
+      aug.match('/files' + filename + '/*').each do |entry|
+        if (aug.get(entry + '/name') == @resource[:name])
+          @property_hash[:aug_entry] = entry
+        end
+      end
+    end
+
     if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
       host_entry = @property_hash[:aug_entry]
     else
