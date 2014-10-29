@@ -112,37 +112,94 @@ Puppet::Type.type(:omd_nagios_hostgroup).provide(:ruby) do
     aug.transform(:lens => 'nagiosobjects.lns', :incl => filename)
     aug.load
 
-    if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
-      hostgroup_entry = @property_hash[:aug_entry]
+    # Comprobamos si el atributo cambiado es el site. En este caso
+    # la operación es un poco especial, porque hay que borrar del fichero
+    # antiguo y crear en el nuevo
+    if (@resource[:site] != @property_hash[:site])
+      change_site(@resource[:name], @property_hash[:site], @resource[:site])
     else
-      # Busco el último hostgroup en augeas
-      last_hostgroup = 0
-      aug.match('/files' + filename + '/*').each do |entry|
-        if entry.match(/^.+\/hostgroup(\[\d+\])?$/)
-          hostgroup_number = (match = entry.match(/^.+\/hostgroup\[(\d+)\]$/)) ? match[1].to_i : 1
-          last_hostgroup = hostgroup_number if hostgroup_number > last_hostgroup
+      if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
+        hostgroup_entry = @property_hash[:aug_entry]
+        # Comprobamos si el aug_entry sigue siendo válido.
+        # Si no, volvemos a buscar la entrada augeas que corresponde
+        # (bug TLM-784)
+        if (aug.get(hostgroup_entry + '/name') != @resource[:name])
+          aug.match('/files' + filename + '/*').each do |entry|
+            if (aug.get(entry + '/name') == @resource[:name])
+              @property_hash[:aug_entry] = entry
+              hostgroup_entry = entry
+            end
+          end
         end
+      else
+        # Busco el último hostgroup en augeas
+        last_hostgroup = 0
+        aug.match('/files' + filename + '/*').each do |entry|
+          if entry.match(/^.+\/hostgroup(\[\d+\])?$/)
+            hostgroup_number = (match = entry.match(/^.+\/hostgroup\[(\d+)\]$/)) ? match[1].to_i : 1
+            last_hostgroup = hostgroup_number if hostgroup_number > last_hostgroup
+          end
+        end
+        hostgroup_entry = '/files' + filename + '/hostgroup[' + (last_hostgroup + 1).to_s + ']'
       end
-      hostgroup_entry = '/files' + filename + '/hostgroup[' + (last_hostgroup + 1).to_s + ']'
-    end
 
-    if @property_flush[:ensure] == :absent
-      aug.rm(hostgroup_entry)
-    else
-      aug.set(hostgroup_entry + '/name', resource[:name]) if resource[:name]
-      aug.set(hostgroup_entry + '/hostgroup_name', resource[:hostgroup_name]) if resource[:hostgroup_name]
-      aug.set(hostgroup_entry + '/action_url', resource[:action_url]) if resource[:action_url]
-      aug.set(hostgroup_entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
-      aug.set(hostgroup_entry + '/hostgroup_members', resource[:hostgroup_members]) if resource[:hostgroup_members]
-      aug.set(hostgroup_entry + '/members', resource[:members]) if resource[:members]
-      aug.set(hostgroup_entry + '/notes', resource[:notes]) if resource[:notes]
-      aug.set(hostgroup_entry + '/notes_url', resource[:notes_url]) if resource[:notes_url]
-      aug.set(hostgroup_entry + '/realm', resource[:realm]) if resource[:realm]
-      aug.set(hostgroup_entry + '/register', resource[:register]) if resource[:register]
-      aug.set(hostgroup_entry + '/use', resource[:use]) if resource[:use]
+      if @property_flush[:ensure] == :absent
+        aug.rm(hostgroup_entry)
+      else
+      end
     end
 
     aug.save
     aug.close
+  end
+
+  def change_site(name, oldsite, newsite)
+    oldfile = "/omd/sites/#{oldsite}/etc/nagios/conf.d/hostgroups_puppet.cfg"
+    newfile = resource[:target] ? @resource[:target] : "/omd/sites/#{newsite}/etc/nagios/conf.d/hostgroups_puppet.cfg"
+
+    newaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    newaug.transform(:lens => 'nagiosobjects.lns', :incl => newfile)
+    newaug.load
+    oldaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    oldaug.transform(:lens => 'nagiosobjects.lns', :incl => oldfile)
+    oldaug.load
+
+    # Buscamos en el viejo y borramos
+    oldaug.match('/files' + oldfile + '/*').each do |entry|
+      if (oldaug.get(entry + '/name') == @resource[:name])
+        oldaug.rm(entry)
+        break
+      end
+    end
+
+    # Añadimos en el nuevo
+    last = 0
+    newaug.match('/files' + newfile + '/*').each do |entry|
+      if entry.match(/^.+\/hostgroup(\[\d+\])?$/)
+        number = (match = entry.match(/^.+\/hostgroup\[(\d+)\]$/)) ? match[1].to_i : 1
+        last = number if number > last
+      end
+    end
+    entry = '/files' + newfile + '/hostgroup[' + (last + 1).to_s + ']'
+    save_with_augeas(newaug, entry)
+
+    oldaug.save
+    oldaug.close
+    newaug.save
+    newaug.close
+  end
+
+  def save_with_augeas(aug, entry)
+    aug.set(entry + '/name', resource[:name]) if resource[:name]
+    aug.set(entry + '/hostgroup_name', resource[:hostgroup_name]) if resource[:hostgroup_name]
+    aug.set(entry + '/action_url', resource[:action_url]) if resource[:action_url]
+    aug.set(entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
+    aug.set(entry + '/hostgroup_members', resource[:hostgroup_members]) if resource[:hostgroup_members]
+    aug.set(entry + '/members', resource[:members]) if resource[:members]
+    aug.set(entry + '/notes', resource[:notes]) if resource[:notes]
+    aug.set(entry + '/notes_url', resource[:notes_url]) if resource[:notes_url]
+    aug.set(entry + '/realm', resource[:realm]) if resource[:realm]
+    aug.set(entry + '/register', resource[:register]) if resource[:register]
+    aug.set(entry + '/use', resource[:use]) if resource[:use]
   end
 end
