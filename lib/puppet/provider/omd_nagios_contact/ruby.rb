@@ -128,65 +128,113 @@ Puppet::Type.type(:omd_nagios_contact).provide(:ruby) do
     aug.transform(:lens => 'nagiosobjects.lns', :incl => filename)
     aug.load
 
-    # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
-    # Si no, volvemos a buscar la entrada augeas que corresponde.
-    # Hay que hacer esto porque otros borrados de elementos pueden
-    # haber cambiado la posición de éste (TLM-784)
-    if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
-      aug.match('/files' + filename + '/*').each do |entry|
-        if (aug.get(entry + '/name') == @resource[:name])
-          @property_hash[:aug_entry] = entry
+    # Comprobamos si el atributo cambiado es el site. En este caso
+    # la operación es un poco especial, porque hay que borrar del fichero
+    # antiguo y crear en el nuevo
+    if (@resource[:site] != @property_hash[:site])
+      change_site(@resource[:name], @property_hash[:site], @resource[:site])
+    else
+
+      # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
+      # Si no, volvemos a buscar la entrada augeas que corresponde.
+      # Hay que hacer esto porque otros borrados de elementos pueden
+      # haber cambiado la posición de éste (TLM-784)
+      if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
+        aug.match('/files' + filename + '/*').each do |entry|
+          if (aug.get(entry + '/name') == @resource[:name])
+            @property_hash[:aug_entry] = entry
+          end
         end
       end
-    end
 
-    if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
-      contact_entry = @property_hash[:aug_entry]
-    else
-      # Busco el último contact en augeas
-      last_contact = 0
-      aug.match('/files' + filename + '/*').each do |entry|
-        if entry.match(/^.+\/contact(\[\d+\])?$/)
-          contact_number = (match = entry.match(/^.+\/contact\[(\d+)\]$/)) ? match[1].to_i : 1
-          last_contact = contact_number if contact_number > last_contact
+      if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
+        contact_entry = @property_hash[:aug_entry]
+      else
+        # Busco el último contact en augeas
+        last_contact = 0
+        aug.match('/files' + filename + '/*').each do |entry|
+          if entry.match(/^.+\/contact(\[\d+\])?$/)
+            contact_number = (match = entry.match(/^.+\/contact\[(\d+)\]$/)) ? match[1].to_i : 1
+            last_contact = contact_number if contact_number > last_contact
+          end
         end
+        contact_entry = '/files' + filename + '/contact[' + (last_contact + 1).to_s + ']'
       end
-      contact_entry = '/files' + filename + '/contact[' + (last_contact + 1).to_s + ']'
-    end
 
-    if @property_flush[:ensure] == :absent
-      aug.rm(contact_entry)
-    else
-      aug.set(contact_entry + '/contact_name', resource[:contact_name]) if resource[:contact_name]
-      aug.set(contact_entry + '/address1', resource[:address1]) if resource[:address1]
-      aug.set(contact_entry + '/address2', resource[:address2]) if resource[:address2]
-      aug.set(contact_entry + '/address3', resource[:address3]) if resource[:address3]
-      aug.set(contact_entry + '/address4', resource[:address4]) if resource[:address4]
-      aug.set(contact_entry + '/address5', resource[:address5]) if resource[:address5]
-      aug.set(contact_entry + '/address6', resource[:address6]) if resource[:address6]
-      aug.set(contact_entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
-      aug.set(contact_entry + '/can_submit_commands', resource[:can_submit_commands]) if resource[:can_submit_commands]
-      aug.set(contact_entry + '/contactgroups', resource[:contactgroups]) if resource[:contactgroups]
-      aug.set(contact_entry + '/email', resource[:email]) if resource[:email]
-      aug.set(contact_entry + '/group', resource[:group]) if resource[:group]
-      aug.set(contact_entry + '/host_notification_commands', resource[:host_notification_commands]) if resource[:host_notification_commands]
-      aug.set(contact_entry + '/host_notification_options', resource[:host_notification_options]) if resource[:host_notification_options]
-      aug.set(contact_entry + '/host_notification_period', resource[:host_notification_period]) if resource[:host_notification_period]
-      aug.set(contact_entry + '/host_notifications_enabled', resource[:host_notifications_enabled]) if resource[:host_notifications_enabled]
-      aug.set(contact_entry + '/mode', resource[:mode]) if resource[:mode]
-      aug.set(contact_entry + '/pager', resource[:pager]) if resource[:pager]
-      aug.set(contact_entry + '/register', resource[:register]) if resource[:register]
-      aug.set(contact_entry + '/retain_nonstatus_information', resource[:retain_nonstatus_information]) if resource[:retain_nonstatus_information]
-      aug.set(contact_entry + '/retain_status_information', resource[:retain_status_information]) if resource[:retain_status_information]
-      aug.set(contact_entry + '/service_notification_commands', resource[:service_notification_commands]) if resource[:service_notification_commands]
-      aug.set(contact_entry + '/service_notification_options', resource[:service_notification_options]) if resource[:service_notification_options]
-      aug.set(contact_entry + '/service_notification_period', resource[:service_notification_period]) if resource[:service_notification_period]
-      aug.set(contact_entry + '/service_notifications_enabled', resource[:service_notifications_enabled]) if resource[:service_notifications_enabled]
-      aug.set(contact_entry + '/use', resource[:use]) if resource[:use]
-      aug.set(contact_entry + '/name', resource[:name]) if resource[:name]
+      if @property_flush[:ensure] == :absent
+        aug.rm(contact_entry)
+      else
+        save_with_augeas(aug, contact_entry)
+      end
     end
 
     aug.save
     aug.close
+  end
+
+  def change_site(name, oldsite, newsite)
+    oldfile = "/omd/sites/#{oldsite}/etc/nagios/conf.d/contacts_puppet.cfg"
+    newfile = resource[:target] ? @resource[:target] : "/omd/sites/#{newsite}/etc/nagios/conf.d/contacts_puppet.cfg"
+
+    newaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    newaug.transform(:lens => 'nagiosobjects.lns', :incl => newfile)
+    newaug.load
+    oldaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    oldaug.transform(:lens => 'nagiosobjects.lns', :incl => oldfile)
+    oldaug.load
+
+    # Buscamos en el viejo y borramos
+    oldaug.match('/files' + oldfile + '/*').each do |entry|
+      if (oldaug.get(entry + '/name') == @resource[:name])
+        oldaug.rm(entry)
+        break
+      end
+    end
+
+    # Añadimos en el nuevo
+    last = 0
+    newaug.match('/files' + newfile + '/*').each do |entry|
+      if entry.match(/^.+\/contact(\[\d+\])?$/)
+        number = (match = entry.match(/^.+\/contact\[(\d+)\]$/)) ? match[1].to_i : 1
+        last = number if number > last
+      end
+    end
+    entry = '/files' + newfile + '/contact[' + (last + 1).to_s + ']'
+    save_with_augeas(newaug, entry)
+
+    oldaug.save
+    oldaug.close
+    newaug.save
+    newaug.close
+  end
+
+  def save_with_augeas(aug, entry)
+    aug.set(entry + '/contact_name', resource[:contact_name]) if resource[:contact_name]
+    aug.set(entry + '/address1', resource[:address1]) if resource[:address1]
+    aug.set(entry + '/address2', resource[:address2]) if resource[:address2]
+    aug.set(entry + '/address3', resource[:address3]) if resource[:address3]
+    aug.set(entry + '/address4', resource[:address4]) if resource[:address4]
+    aug.set(entry + '/address5', resource[:address5]) if resource[:address5]
+    aug.set(entry + '/address6', resource[:address6]) if resource[:address6]
+    aug.set(entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
+    aug.set(entry + '/can_submit_commands', resource[:can_submit_commands]) if resource[:can_submit_commands]
+    aug.set(entry + '/contactgroups', resource[:contactgroups]) if resource[:contactgroups]
+    aug.set(entry + '/email', resource[:email]) if resource[:email]
+    aug.set(entry + '/group', resource[:group]) if resource[:group]
+    aug.set(entry + '/host_notification_commands', resource[:host_notification_commands]) if resource[:host_notification_commands]
+    aug.set(entry + '/host_notification_options', resource[:host_notification_options]) if resource[:host_notification_options]
+    aug.set(entry + '/host_notification_period', resource[:host_notification_period]) if resource[:host_notification_period]
+    aug.set(entry + '/host_notifications_enabled', resource[:host_notifications_enabled]) if resource[:host_notifications_enabled]
+    aug.set(entry + '/mode', resource[:mode]) if resource[:mode]
+    aug.set(entry + '/pager', resource[:pager]) if resource[:pager]
+    aug.set(entry + '/register', resource[:register]) if resource[:register]
+    aug.set(entry + '/retain_nonstatus_information', resource[:retain_nonstatus_information]) if resource[:retain_nonstatus_information]
+    aug.set(entry + '/retain_status_information', resource[:retain_status_information]) if resource[:retain_status_information]
+    aug.set(entry + '/service_notification_commands', resource[:service_notification_commands]) if resource[:service_notification_commands]
+    aug.set(entry + '/service_notification_options', resource[:service_notification_options]) if resource[:service_notification_options]
+    aug.set(entry + '/service_notification_period', resource[:service_notification_period]) if resource[:service_notification_period]
+    aug.set(entry + '/service_notifications_enabled', resource[:service_notifications_enabled]) if resource[:service_notifications_enabled]
+    aug.set(entry + '/use', resource[:use]) if resource[:use]
+    aug.set(entry + '/name', resource[:name]) if resource[:name]
   end
 end

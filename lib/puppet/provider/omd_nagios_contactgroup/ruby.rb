@@ -108,45 +108,93 @@ Puppet::Type.type(:omd_nagios_contactgroup).provide(:ruby) do
     aug.transform(:lens => 'nagiosobjects.lns', :incl => filename)
     aug.load
 
-    # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
-    # Si no, volvemos a buscar la entrada augeas que corresponde.
-    # Hay que hacer esto porque otros borrados de elementos pueden
-    # haber cambiado la posición de éste (TLM-784)
-    if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
-      aug.match('/files' + filename + '/*').each do |entry|
-        if (aug.get(entry + '/name') == @resource[:name])
-          @property_hash[:aug_entry] = entry
+    # Comprobamos si el atributo cambiado es el site. En este caso
+    # la operación es un poco especial, porque hay que borrar del fichero
+    # antiguo y crear en el nuevo
+    if (@resource[:site] != @property_hash[:site])
+      change_site(@resource[:name], @property_hash[:site], @resource[:site])
+    else
+
+      # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
+      # Si no, volvemos a buscar la entrada augeas que corresponde.
+      # Hay que hacer esto porque otros borrados de elementos pueden
+      # haber cambiado la posición de éste (TLM-784)
+      if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
+        aug.match('/files' + filename + '/*').each do |entry|
+          if (aug.get(entry + '/name') == @resource[:name])
+            @property_hash[:aug_entry] = entry
+          end
         end
       end
-    end
 
-    if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
-      contactgroup_entry = @property_hash[:aug_entry]
-    else
-      # Busco el último contactgroup en augeas
-      last_contactgroup = 0
-      aug.match('/files' + filename + '/*').each do |entry|
-        if entry.match(/^.+\/contactgroup(\[\d+\])?$/)
-          contactgroup_number = (match = entry.match(/^.+\/contactgroup\[(\d+)\]$/)) ? match[1].to_i : 1
-          last_contactgroup = contactgroup_number if contactgroup_number > last_contactgroup
+      if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
+        contactgroup_entry = @property_hash[:aug_entry]
+      else
+        # Busco el último contactgroup en augeas
+        last_contactgroup = 0
+        aug.match('/files' + filename + '/*').each do |entry|
+          if entry.match(/^.+\/contactgroup(\[\d+\])?$/)
+            contactgroup_number = (match = entry.match(/^.+\/contactgroup\[(\d+)\]$/)) ? match[1].to_i : 1
+            last_contactgroup = contactgroup_number if contactgroup_number > last_contactgroup
+          end
         end
+        contactgroup_entry = '/files' + filename + '/contactgroup[' + (last_contactgroup + 1).to_s + ']'
       end
-      contactgroup_entry = '/files' + filename + '/contactgroup[' + (last_contactgroup + 1).to_s + ']'
-    end
 
-    if @property_flush[:ensure] == :absent
-      aug.rm(contactgroup_entry)
-    else
-      aug.set(contactgroup_entry + '/contactgroup_name', resource[:contactgroup_name]) if resource[:contactgroup_name]
-      aug.set(contactgroup_entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
-      aug.set(contactgroup_entry + '/contactgroup_members', resource[:contactgroup_members]) if resource[:contactgroup_members]
-      aug.set(contactgroup_entry + '/members', resource[:members]) if resource[:members]
-      aug.set(contactgroup_entry + '/register', resource[:register]) if resource[:register]
-      aug.set(contactgroup_entry + '/use', resource[:use]) if resource[:use]
-      aug.set(contactgroup_entry + '/name', resource[:name]) if resource[:name]
+      if @property_flush[:ensure] == :absent
+        aug.rm(contactgroup_entry)
+      else
+        save_with_augeas(aug, contactgroup_entry)
+      end
     end
 
     aug.save
     aug.close
+  end
+
+  def change_site(name, oldsite, newsite)
+    oldfile = "/omd/sites/#{oldsite}/etc/nagios/conf.d/contactgroups_puppet.cfg"
+    newfile = resource[:target] ? @resource[:target] : "/omd/sites/#{newsite}/etc/nagios/conf.d/contactgroups_puppet.cfg"
+
+    newaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    newaug.transform(:lens => 'nagiosobjects.lns', :incl => newfile)
+    newaug.load
+    oldaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    oldaug.transform(:lens => 'nagiosobjects.lns', :incl => oldfile)
+    oldaug.load
+
+    # Buscamos en el viejo y borramos
+    oldaug.match('/files' + oldfile + '/*').each do |entry|
+      if (oldaug.get(entry + '/name') == @resource[:name])
+        oldaug.rm(entry)
+        break
+      end
+    end
+
+    # Añadimos en el nuevo
+    last = 0
+    newaug.match('/files' + newfile + '/*').each do |entry|
+      if entry.match(/^.+\/contactgroup(\[\d+\])?$/)
+        number = (match = entry.match(/^.+\/contactgroup\[(\d+)\]$/)) ? match[1].to_i : 1
+        last = number if number > last
+      end
+    end
+    entry = '/files' + newfile + '/contactgroup[' + (last + 1).to_s + ']'
+    save_with_augeas(newaug, entry)
+
+    oldaug.save
+    oldaug.close
+    newaug.save
+    newaug.close
+  end
+
+  def save_with_augeas(aug, entry)
+    aug.set(entry + '/contactgroup_name', resource[:contactgroup_name]) if resource[:contactgroup_name]
+    aug.set(entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
+    aug.set(entry + '/contactgroup_members', resource[:contactgroup_members]) if resource[:contactgroup_members]
+    aug.set(entry + '/members', resource[:members]) if resource[:members]
+    aug.set(entry + '/register', resource[:register]) if resource[:register]
+    aug.set(entry + '/use', resource[:use]) if resource[:use]
+    aug.set(entry + '/name', resource[:name]) if resource[:name]
   end
 end

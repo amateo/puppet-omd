@@ -17,6 +17,10 @@ Puppet::Type.type(:omd_nagios_service).provide(:ruby) do
     @property_flush[:ensure] = :present
   end
 
+  def site=(value)
+    @property_flush[:site] = value
+  end
+
   def self.instances
     ins = []
     self.get_files.collect do |f|
@@ -155,86 +159,134 @@ Puppet::Type.type(:omd_nagios_service).provide(:ruby) do
     aug.transform(:lens => 'nagiosobjects.lns', :incl => filename)
     aug.load
 
-    # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
-    # Si no, volvemos a buscar la entrada augeas que corresponde.
-    # Hay que hacer esto porque otros borrados de elementos pueden
-    # haber cambiado la posición de éste (TLM-784)
-    if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
-      aug.match('/files' + filename + '/*').each do |entry|
-        if (aug.get(entry + '/name') == @resource[:name])
-          @property_hash[:aug_entry] = entry
+    # Comprobamos si el atributo cambiado es el site. En este caso
+    # la operación es un poco especial, porque hay que borrar del fichero
+    # antiguo y crear en el nuevo
+    if (@resource[:site] != @property_hash[:site])
+      change_site(@resource[:name], @property_hash[:site], @resource[:site])
+    else
+
+      # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
+      # Si no, volvemos a buscar la entrada augeas que corresponde.
+      # Hay que hacer esto porque otros borrados de elementos pueden
+      # haber cambiado la posición de éste (TLM-784)
+      if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
+        aug.match('/files' + filename + '/*').each do |entry|
+          if (aug.get(entry + '/name') == @resource[:name])
+            @property_hash[:aug_entry] = entry
+          end
         end
       end
-    end
 
-    if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
-      service_entry = @property_hash[:aug_entry]
-    else
-      # Busco el último service en augeas
-      last_service = 0
-      aug.match('/files' + filename + '/*').each do |entry|
-        if entry.match(/^.+\/service(\[\d+\])?$/)
-          service_number = (match = entry.match(/^.+\/service\[(\d+)\]$/)) ? match[1].to_i : 1
-          last_service = service_number if service_number > last_service
+      if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
+        service_entry = @property_hash[:aug_entry]
+      else
+        # Busco el último service en augeas
+        last_service = 0
+        aug.match('/files' + filename + '/*').each do |entry|
+          if entry.match(/^.+\/service(\[\d+\])?$/)
+            service_number = (match = entry.match(/^.+\/service\[(\d+)\]$/)) ? match[1].to_i : 1
+            last_service = service_number if service_number > last_service
+          end
         end
+        service_entry = '/files' + filename + '/service[' + (last_service + 1).to_s + ']'
       end
-      service_entry = '/files' + filename + '/service[' + (last_service + 1).to_s + ']'
-    end
 
-    if @property_flush[:ensure] == :absent
-      aug.rm(service_entry)
-    else
-      aug.set(service_entry + '/name', resource[:name]) if resource[:name]
-      aug.set(service_entry + '/action_url', resource[:action_url]) if resource[:action_url]
-      aug.set(service_entry + '/active_checks_enabled', resource[:active_checks_enabled]) if resource[:active_checks_enabled]
-      aug.set(service_entry + '/business_impact', resource[:business_impact]) if resource[:business_impact]
-      aug.set(service_entry + '/check_command', resource[:check_command]) if resource[:check_command]
-      aug.set(service_entry + '/check_freshness', resource[:check_freshness]) if resource[:check_freshness]
-      aug.set(service_entry + '/check_interval', resource[:check_interval]) if resource[:check_interval]
-      aug.set(service_entry + '/check_period', resource[:check_period]) if resource[:check_period]
-      aug.set(service_entry + '/contact_groups', resource[:contact_groups]) if resource[:contact_groups]
-      aug.set(service_entry + '/contacts', resource[:contacts]) if resource[:contacts]
-      aug.set(service_entry + '/display_name', resource[:display_name]) if resource[:display_name]
-      aug.set(service_entry + '/event_handler', resource[:event_handler]) if resource[:event_handler]
-      aug.set(service_entry + '/event_handler_enabled', resource[:event_handler_enabled]) if resource[:event_handler_enabled]
-      aug.set(service_entry + '/failure_prediction_enabled', resource[:failure_prediction_enabled]) if resource[:failure_prediction_enabled]
-      aug.set(service_entry + '/first_notification_delay', resource[:first_notification_delay]) if resource[:first_notification_delay]
-      aug.set(service_entry + '/flap_detection_enabled', resource[:flap_detection_enabled]) if resource[:flap_detection_enabled]
-      aug.set(service_entry + '/flap_detection_options', resource[:flap_detection_options]) if resource[:flap_detection_options]
-      aug.set(service_entry + '/freshness_threshold', resource[:freshness_threshold]) if resource[:freshness_threshold]
-      aug.set(service_entry + '/high_flap_threshold', resource[:high_flap_threshold]) if resource[:high_flap_threshold]
-      aug.set(service_entry + '/host_name', resource[:host_name]) if resource[:host_name]
-      aug.set(service_entry + '/hostgroup_name', resource[:hostgroup_name]) if resource[:hostgroup_name]
-      aug.set(service_entry + '/icon_image', resource[:icon_image]) if resource[:icon_image]
-      aug.set(service_entry + '/icon_image_alt', resource[:icon_image_alt]) if resource[:icon_image_alt]
-      aug.set(service_entry + '/initial_state', resource[:initial_state]) if resource[:initial_state]
-      aug.set(service_entry + '/is_volatile', resource[:is_volatile]) if resource[:is_volatile]
-      aug.set(service_entry + '/low_flap_threshold', resource[:low_flap_threshold]) if resource[:low_flap_threshold]
-      aug.set(service_entry + '/max_check_attempts', resource[:max_check_attempts]) if resource[:max_check_attempts]
-      aug.set(service_entry + '/normal_check_interval', resource[:normal_check_interval]) if resource[:normal_check_interval]
-      aug.set(service_entry + '/notes', resource[:notes]) if resource[:notes]
-      aug.set(service_entry + '/notes_url', resource[:notes_url]) if resource[:notes_url]
-      aug.set(service_entry + '/notification_interval', resource[:notification_interval]) if resource[:notification_interval]
-      aug.set(service_entry + '/notification_options', resource[:notification_options]) if resource[:notification_options]
-      aug.set(service_entry + '/notification_period', resource[:notification_period]) if resource[:notification_period]
-      aug.set(service_entry + '/notifications_enabled', resource[:notifications_enabled]) if resource[:notifications_enabled]
-      aug.set(service_entry + '/obsess_over_service', resource[:obsess_over_service]) if resource[:obsess_over_service]
-      aug.set(service_entry + '/parallelize_check', resource[:parallelize_check]) if resource[:parallelize_check]
-      aug.set(service_entry + '/passive_checks_enabled', resource[:passive_checks_enabled]) if resource[:passive_checks_enabled]
-      aug.set(service_entry + '/poller_tag', resource[:poller_tag]) if resource[:poller_tag]
-      aug.set(service_entry + '/process_perf_data', resource[:process_perf_data]) if resource[:process_perf_data]
-      aug.set(service_entry + '/register', resource[:register]) if resource[:register]
-      aug.set(service_entry + '/retain_nonstatus_information', resource[:retain_nonstatus_information]) if resource[:retain_nonstatus_information]
-      aug.set(service_entry + '/retain_status_information', resource[:retain_status_information]) if resource[:retain_status_information]
-      aug.set(service_entry + '/retry_check_interval', resource[:retry_check_interval]) if resource[:retry_check_interval]
-      aug.set(service_entry + '/retry_interval', resource[:retry_interval]) if resource[:retry_interval]
-      aug.set(service_entry + '/service_description', resource[:service_description]) if resource[:service_description]
-      aug.set(service_entry + '/servicegroups', resource[:servicegroups]) if resource[:servicegroups]
-      aug.set(service_entry + '/stalking_options', resource[:stalking_options]) if resource[:stalking_options]
-      aug.set(service_entry + '/use', resource[:use]) if resource[:use]
+      if @property_flush[:ensure] == :absent
+        aug.rm(service_entry)
+      else
+        save_with_augeas(aug, service_entry)
+      end
     end
 
     aug.save
     aug.close
+  end
+
+  def change_site(name, oldsite, newsite)
+    oldfile = "/omd/sites/#{oldsite}/etc/nagios/conf.d/services_puppet.cfg"
+    newfile = resource[:target] ? @resource[:target] : "/omd/sites/#{newsite}/etc/nagios/conf.d/services_puppet.cfg"
+
+    newaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    newaug.transform(:lens => 'nagiosobjects.lns', :incl => newfile)
+    newaug.load
+    oldaug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
+    oldaug.transform(:lens => 'nagiosobjects.lns', :incl => oldfile)
+    oldaug.load
+
+    # Buscamos en el viejo y borramos
+    oldaug.match('/files' + oldfile + '/*').each do |entry|
+      if (oldaug.get(entry + '/name') == @resource[:name])
+        oldaug.rm(entry)
+        break
+      end
+    end
+
+    # Añadimos en el nuevo
+    last = 0
+    newaug.match('/files' + newfile + '/*').each do |entry|
+      if entry.match(/^.+\/service(\[\d+\])?$/)
+        number = (match = entry.match(/^.+\/service\[(\d+)\]$/)) ? match[1].to_i : 1
+        last = number if number > last
+      end
+    end
+    entry = '/files' + newfile + '/service[' + (last + 1).to_s + ']'
+    save_with_augeas(newaug, entry)
+
+    oldaug.save
+    oldaug.close
+    newaug.save
+    newaug.close
+  end
+
+  def save_with_augeas(aug, entry)
+    aug.set(entry + '/name', resource[:name]) if resource[:name]
+    aug.set(entry + '/action_url', resource[:action_url]) if resource[:action_url]
+    aug.set(entry + '/active_checks_enabled', resource[:active_checks_enabled]) if resource[:active_checks_enabled]
+    aug.set(entry + '/business_impact', resource[:business_impact]) if resource[:business_impact]
+    aug.set(entry + '/check_command', resource[:check_command]) if resource[:check_command]
+    aug.set(entry + '/check_freshness', resource[:check_freshness]) if resource[:check_freshness]
+    aug.set(entry + '/check_interval', resource[:check_interval]) if resource[:check_interval]
+    aug.set(entry + '/check_period', resource[:check_period]) if resource[:check_period]
+    aug.set(entry + '/contact_groups', resource[:contact_groups]) if resource[:contact_groups]
+    aug.set(entry + '/contacts', resource[:contacts]) if resource[:contacts]
+    aug.set(entry + '/display_name', resource[:display_name]) if resource[:display_name]
+    aug.set(entry + '/event_handler', resource[:event_handler]) if resource[:event_handler]
+    aug.set(entry + '/event_handler_enabled', resource[:event_handler_enabled]) if resource[:event_handler_enabled]
+    aug.set(entry + '/failure_prediction_enabled', resource[:failure_prediction_enabled]) if resource[:failure_prediction_enabled]
+    aug.set(entry + '/first_notification_delay', resource[:first_notification_delay]) if resource[:first_notification_delay]
+    aug.set(entry + '/flap_detection_enabled', resource[:flap_detection_enabled]) if resource[:flap_detection_enabled]
+    aug.set(entry + '/flap_detection_options', resource[:flap_detection_options]) if resource[:flap_detection_options]
+    aug.set(entry + '/freshness_threshold', resource[:freshness_threshold]) if resource[:freshness_threshold]
+    aug.set(entry + '/high_flap_threshold', resource[:high_flap_threshold]) if resource[:high_flap_threshold]
+    aug.set(entry + '/host_name', resource[:host_name]) if resource[:host_name]
+    aug.set(entry + '/hostgroup_name', resource[:hostgroup_name]) if resource[:hostgroup_name]
+    aug.set(entry + '/icon_image', resource[:icon_image]) if resource[:icon_image]
+    aug.set(entry + '/icon_image_alt', resource[:icon_image_alt]) if resource[:icon_image_alt]
+    aug.set(entry + '/initial_state', resource[:initial_state]) if resource[:initial_state]
+    aug.set(entry + '/is_volatile', resource[:is_volatile]) if resource[:is_volatile]
+    aug.set(entry + '/low_flap_threshold', resource[:low_flap_threshold]) if resource[:low_flap_threshold]
+    aug.set(entry + '/max_check_attempts', resource[:max_check_attempts]) if resource[:max_check_attempts]
+    aug.set(entry + '/normal_check_interval', resource[:normal_check_interval]) if resource[:normal_check_interval]
+    aug.set(entry + '/notes', resource[:notes]) if resource[:notes]
+    aug.set(entry + '/notes_url', resource[:notes_url]) if resource[:notes_url]
+    aug.set(entry + '/notification_interval', resource[:notification_interval]) if resource[:notification_interval]
+    aug.set(entry + '/notification_options', resource[:notification_options]) if resource[:notification_options]
+    aug.set(entry + '/notification_period', resource[:notification_period]) if resource[:notification_period]
+    aug.set(entry + '/notifications_enabled', resource[:notifications_enabled]) if resource[:notifications_enabled]
+    aug.set(entry + '/obsess_over_service', resource[:obsess_over_service]) if resource[:obsess_over_service]
+    aug.set(entry + '/parallelize_check', resource[:parallelize_check]) if resource[:parallelize_check]
+    aug.set(entry + '/passive_checks_enabled', resource[:passive_checks_enabled]) if resource[:passive_checks_enabled]
+    aug.set(entry + '/poller_tag', resource[:poller_tag]) if resource[:poller_tag]
+    aug.set(entry + '/process_perf_data', resource[:process_perf_data]) if resource[:process_perf_data]
+    aug.set(entry + '/register', resource[:register]) if resource[:register]
+    aug.set(entry + '/retain_nonstatus_information', resource[:retain_nonstatus_information]) if resource[:retain_nonstatus_information]
+    aug.set(entry + '/retain_status_information', resource[:retain_status_information]) if resource[:retain_status_information]
+    aug.set(entry + '/retry_check_interval', resource[:retry_check_interval]) if resource[:retry_check_interval]
+    aug.set(entry + '/retry_interval', resource[:retry_interval]) if resource[:retry_interval]
+    aug.set(entry + '/service_description', resource[:service_description]) if resource[:service_description]
+    aug.set(entry + '/servicegroups', resource[:servicegroups]) if resource[:servicegroups]
+    aug.set(entry + '/stalking_options', resource[:stalking_options]) if resource[:stalking_options]
+    aug.set(entry + '/use', resource[:use]) if resource[:use]
   end
 end
