@@ -111,20 +111,19 @@ Puppet::Type.type(:omd_nagios_command).provide(:ruby) do
     if (@resource[:site] != @property_hash[:site])
       change_site(@resource[:name], @property_hash[:site], @resource[:site])
     else
-      # Antes de nada, comprobamos que el aug_entry sigue siendo válido.
-      # Si no, volvemos a buscar la entrada augeas que corresponde.
-      # Hay que hacer esto porque otros borrados de elementos pueden
-      # haber cambiado la posición de éste (TLM-784)
-      if (aug.get(@property_hash[:aug_entry] + '/name') != @resource[:name])
-        aug.match('/files' + filename + '/*').each do |entry|
-          if (aug.get(entry + '/name') == @resource[:name])
-            @property_hash[:aug_entry] = entry
-          end
-        end
-      end
-
       if @property_hash[:aug_entry] and @property_hash[:aug_entry].match(/^\/files#{filename}\//)
         command_entry = @property_hash[:aug_entry]
+        # Comprobamos si el aug_entry sigue siendo válido.
+        # Si no, volvemos a buscar la entrada augeas que corresponde
+        # (bug TLM-784)
+        if (aug.get(command_entry + '/name') != @resource[:name])
+          aug.match('/files' + filename + '/*').each do |entry|
+            if (aug.get(entry + '/name') == @resource[:name])
+              @property_hash[:aug_entry] = entry
+              command_entry = entry
+            end
+          end
+        end
       else
         # Busco el último command en augeas
         last_command = 0
