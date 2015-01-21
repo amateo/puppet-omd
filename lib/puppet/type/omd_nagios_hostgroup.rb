@@ -7,6 +7,30 @@ Puppet::Type.newtype(:omd_nagios_hostgroup) do
 
   ensurable
 
+  class HostGroupParam < Puppet::Property
+    class << self
+      attr_accessor :boundaries, :default
+    end
+
+    def should
+      if @should and @should[0] == :absent
+        :absent
+      else
+        @should.join(',')
+      end
+    end
+
+    munge do |value|
+      if value == 'absent' or value == :absent
+        return :absent
+      elsif value == ''
+        return :absent
+      else
+        return value
+      end
+    end
+  end
+
   newparam(:name) do
     desc "The name of the puppet's nagios hostgroup resource"
     isnamevar
@@ -21,40 +45,40 @@ Puppet::Type.newtype(:omd_nagios_hostgroup) do
     end
   end
 
-  newproperty(:hostgroup_name) do
+  newproperty(:hostgroup_name, :parent => HostGroupParam) do
     desc 'The name of this nagios_hostgroup resource.'
     defaultto { @resource[:name] }
   end
 
-  newproperty(:action_url) do
+  newproperty(:action_url, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:nagios_alias) do
+  newproperty(:nagios_alias, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:hostgroup_members) do
+  newproperty(:hostgroup_members, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:members) do
+  newproperty(:members, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:notes) do
+  newproperty(:notes, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:notes_url) do
+  newproperty(:notes_url, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:realm) do
+  newproperty(:realm, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:register) do
+  newproperty(:register, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
@@ -69,7 +93,7 @@ Puppet::Type.newtype(:omd_nagios_hostgroup) do
     end
   end
 
-  newproperty(:use) do
+  newproperty(:use, :parent => HostGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 end

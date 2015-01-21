@@ -187,12 +187,20 @@ Puppet::Type.type(:omd_nagios_contactgroup).provide(:ruby) do
   end
 
   def save_with_augeas(aug, entry)
-    aug.set(entry + '/contactgroup_name', resource[:contactgroup_name]) if resource[:contactgroup_name]
-    aug.set(entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
-    aug.set(entry + '/contactgroup_members', resource[:contactgroup_members]) if resource[:contactgroup_members]
-    aug.set(entry + '/members', resource[:members]) if resource[:members]
-    aug.set(entry + '/register', resource[:register]) if resource[:register]
-    aug.set(entry + '/use', resource[:use]) if resource[:use]
-    aug.set(entry + '/name', resource[:name]) if resource[:name]
+    set_value(aug, entry, 'contactgroup_name', @resource[:contactgroup_name]) if @resource[:contactgroup_name]
+    set_value(aug, entry, 'alias', @resource[:nagios_alias]) if @resource[:nagios_alias]
+    set_value(aug, entry, 'contactgroup_members', @resource[:contactgroup_members]) if @resource[:contactgroup_members]
+    set_value(aug, entry, 'members', @resource[:members]) if @resource[:members]
+    set_value(aug, entry, 'register', @resource[:register]) if @resource[:register]
+    set_value(aug, entry, 'use', @resource[:use]) if @resource[:use]
+    set_value(aug, entry, 'name', @resource[:name]) if @resource[:name]
+  end
+
+  def set_value(aug, entry, attr, value)
+    if value != :absent
+      aug.set(entry + "/#{attr}", value)
+    else
+      aug.rm(entry + "/#{attr}")
+    end
   end
 end

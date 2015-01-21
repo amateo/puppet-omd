@@ -190,16 +190,24 @@ Puppet::Type.type(:omd_nagios_hostgroup).provide(:ruby) do
   end
 
   def save_with_augeas(aug, entry)
-    aug.set(entry + '/name', resource[:name]) if resource[:name]
-    aug.set(entry + '/hostgroup_name', resource[:hostgroup_name]) if resource[:hostgroup_name]
-    aug.set(entry + '/action_url', resource[:action_url]) if resource[:action_url]
-    aug.set(entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
-    aug.set(entry + '/hostgroup_members', resource[:hostgroup_members]) if resource[:hostgroup_members]
-    aug.set(entry + '/members', resource[:members]) if resource[:members]
-    aug.set(entry + '/notes', resource[:notes]) if resource[:notes]
-    aug.set(entry + '/notes_url', resource[:notes_url]) if resource[:notes_url]
-    aug.set(entry + '/realm', resource[:realm]) if resource[:realm]
-    aug.set(entry + '/register', resource[:register]) if resource[:register]
-    aug.set(entry + '/use', resource[:use]) if resource[:use]
+    set_value(aug, entry, 'name', @resource[:name]) if @resource[:name]
+    set_value(aug, entry, 'hostgroup_name', @resource[:hostgroup_name]) if @resource[:hostgroup_name]
+    set_value(aug, entry, 'action_url', @resource[:action_url]) if @resource[:action_url]
+    set_value(aug, entry, 'alias', @resource[:nagios_alias]) if @resource[:nagios_alias]
+    set_value(aug, entry, 'hostgroup_members', @resource[:hostgroup_members]) if @resource[:hostgroup_members]
+    set_value(aug, entry, 'members', @resource[:members]) if @resource[:members]
+    set_value(aug, entry, 'notes', @resource[:notes]) if @resource[:notes]
+    set_value(aug, entry, 'notes_url', @resource[:notes_url]) if @resource[:notes_url]
+    set_value(aug, entry, 'realm', @resource[:realm]) if @resource[:realm]
+    set_value(aug, entry, 'register', @resource[:register]) if @resource[:register]
+    set_value(aug, entry, 'use', @resource[:use]) if @resource[:use]
+  end
+
+  def set_value(aug, entry, attr, value)
+    if value != :absent
+      aug.set(entry + "/#{attr}", value)
+    else
+      aug.rm(entry + "/#{attr}")
+    end
   end
 end

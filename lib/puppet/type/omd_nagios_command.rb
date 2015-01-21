@@ -7,6 +7,30 @@ Puppet::Type.newtype(:omd_nagios_command) do
 
   ensurable
 
+  class CommandParam < Puppet::Property
+    class << self
+      attr_accessor :boundaries, :default
+    end
+
+    def should
+      if @should and @should[0] == :absent
+        :absent
+      else
+        @should.join(',')
+      end
+    end
+
+    munge do |value|
+      if value == 'absent' or value == :absent
+        return :absent
+      elsif value == ''
+        return :absent
+      else
+        return value
+      end
+    end
+  end
+
   newparam(:name) do
     desc "The name of the puppet's nagios command resource"
     isnamevar
@@ -21,17 +45,17 @@ Puppet::Type.newtype(:omd_nagios_command) do
     end
   end
 
-  newproperty(:command_name) do
+  newproperty(:command_name, :parent => CommandParam) do
     isnamevar
     desc 'The name of this nagios_command resource.'
     defaultto { @resource[:name] }
   end
 
-  newproperty(:command_line) do
+  newproperty(:command_line, :parent => CommandParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:poller_tag) do
+  newproperty(:poller_tag, :parent => CommandParam) do
     desc 'Nagios configuration file parameter.'
   end
 
@@ -46,7 +70,7 @@ Puppet::Type.newtype(:omd_nagios_command) do
     end
   end
 
-  newproperty(:use) do
+  newproperty(:use, :parent => CommandParam) do
     desc 'Nagios configuration file parameter.'
   end
 end

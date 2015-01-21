@@ -184,9 +184,17 @@ Puppet::Type.type(:omd_nagios_command).provide(:ruby) do
   end
 
   def save_with_augeas(aug, entry)
-    aug.set(entry + '/command_name', resource[:command_name]) if resource[:command_name]
-    aug.set(entry + '/command_line', resource[:command_line]) if resource[:command_line]
-    aug.set(entry + '/poller_tag', resource[:poller_tag]) if resource[:poller_tag]
-    aug.set(entry + '/use', resource[:use]) if resource[:use]
+    set_value(aug, entry, 'command_name', @resource[:command_name]) if @resource[:command_name]
+    set_value(aug, entry, 'command_line', @resource[:command_line]) if @resource[:command_line]
+    set_value(aug, entry, 'poller_tag', @resource[:poller_tag]) if @resource[:poller_tag]
+    set_value(aug, entry, 'use', @resource[:use]) if @resource[:use]
+  end
+
+  def set_value(aug, entry, attr, value)
+    if value != :absent
+      aug.set(entry + "/#{attr}", value)
+    else
+      aug.rm(entry + "/#{attr}")
+    end
   end
 end

@@ -207,32 +207,40 @@ Puppet::Type.type(:omd_nagios_contact).provide(:ruby) do
   end
 
   def save_with_augeas(aug, entry)
-    aug.set(entry + '/contact_name', resource[:contact_name]) if resource[:contact_name]
-    aug.set(entry + '/address1', resource[:address1]) if resource[:address1]
-    aug.set(entry + '/address2', resource[:address2]) if resource[:address2]
-    aug.set(entry + '/address3', resource[:address3]) if resource[:address3]
-    aug.set(entry + '/address4', resource[:address4]) if resource[:address4]
-    aug.set(entry + '/address5', resource[:address5]) if resource[:address5]
-    aug.set(entry + '/address6', resource[:address6]) if resource[:address6]
-    aug.set(entry + '/alias', resource[:nagios_alias]) if resource[:nagios_alias]
-    aug.set(entry + '/can_submit_commands', resource[:can_submit_commands]) if resource[:can_submit_commands]
-    aug.set(entry + '/contactgroups', resource[:contactgroups]) if resource[:contactgroups]
-    aug.set(entry + '/email', resource[:email]) if resource[:email]
-    aug.set(entry + '/group', resource[:group]) if resource[:group]
-    aug.set(entry + '/host_notification_commands', resource[:host_notification_commands]) if resource[:host_notification_commands]
-    aug.set(entry + '/host_notification_options', resource[:host_notification_options]) if resource[:host_notification_options]
-    aug.set(entry + '/host_notification_period', resource[:host_notification_period]) if resource[:host_notification_period]
-    aug.set(entry + '/host_notifications_enabled', resource[:host_notifications_enabled]) if resource[:host_notifications_enabled]
-    aug.set(entry + '/mode', resource[:mode]) if resource[:mode]
-    aug.set(entry + '/pager', resource[:pager]) if resource[:pager]
-    aug.set(entry + '/register', resource[:register]) if resource[:register]
-    aug.set(entry + '/retain_nonstatus_information', resource[:retain_nonstatus_information]) if resource[:retain_nonstatus_information]
-    aug.set(entry + '/retain_status_information', resource[:retain_status_information]) if resource[:retain_status_information]
-    aug.set(entry + '/service_notification_commands', resource[:service_notification_commands]) if resource[:service_notification_commands]
-    aug.set(entry + '/service_notification_options', resource[:service_notification_options]) if resource[:service_notification_options]
-    aug.set(entry + '/service_notification_period', resource[:service_notification_period]) if resource[:service_notification_period]
-    aug.set(entry + '/service_notifications_enabled', resource[:service_notifications_enabled]) if resource[:service_notifications_enabled]
-    aug.set(entry + '/use', resource[:use]) if resource[:use]
-    aug.set(entry + '/name', resource[:name]) if resource[:name]
+    set_value(aug, entry, 'contact_name', @resource[:contact_name]) if @resource[:contact_name]
+    set_value(aug, entry, 'address1', @resource[:address1]) if @resource[:address1]
+    set_value(aug, entry, 'address2', @resource[:address2]) if @resource[:address2]
+    set_value(aug, entry, 'address3', @resource[:address3]) if @resource[:address3]
+    set_value(aug, entry, 'address4', @resource[:address4]) if @resource[:address4]
+    set_value(aug, entry, 'address5', @resource[:address5]) if @resource[:address5]
+    set_value(aug, entry, 'address6', @resource[:address6]) if @resource[:address6]
+    set_value(aug, entry, 'alias', @resource[:nagios_alias]) if @resource[:nagios_alias]
+    set_value(aug, entry, 'can_submit_commands', @resource[:can_submit_commands]) if @resource[:can_submit_commands]
+    set_value(aug, entry, 'contactgroups', @resource[:contactgroups]) if @resource[:contactgroups]
+    set_value(aug, entry, 'email', @resource[:email]) if @resource[:email]
+    set_value(aug, entry, 'group', @resource[:group]) if @resource[:group]
+    set_value(aug, entry, 'host_notification_commands', @resource[:host_notification_commands]) if @resource[:host_notification_commands]
+    set_value(aug, entry, 'host_notification_options', @resource[:host_notification_options]) if @resource[:host_notification_options]
+    set_value(aug, entry, 'host_notification_period', @resource[:host_notification_period]) if @resource[:host_notification_period]
+    set_value(aug, entry, 'host_notifications_enabled', @resource[:host_notifications_enabled]) if @resource[:host_notifications_enabled]
+    set_value(aug, entry, 'mode', @resource[:mode]) if @resource[:mode]
+    set_value(aug, entry, 'pager', @resource[:pager]) if @resource[:pager]
+    set_value(aug, entry, 'register', @resource[:register]) if @resource[:register]
+    set_value(aug, entry, 'retain_nonstatus_information', @resource[:retain_nonstatus_information]) if @resource[:retain_nonstatus_information]
+    set_value(aug, entry, 'retain_status_information', @resource[:retain_status_information]) if @resource[:retain_status_information]
+    set_value(aug, entry, 'service_notification_commands', @resource[:service_notification_commands]) if @resource[:service_notification_commands]
+    set_value(aug, entry, 'service_notification_options', @resource[:service_notification_options]) if @resource[:service_notification_options]
+    set_value(aug, entry, 'service_notification_period', @resource[:service_notification_period]) if @resource[:service_notification_period]
+    set_value(aug, entry, 'service_notifications_enabled', @resource[:service_notifications_enabled]) if @resource[:service_notifications_enabled]
+    set_value(aug, entry, 'use', @resource[:use]) if @resource[:use]
+    set_value(aug, entry, 'name', @resource[:name]) if @resource[:name]
+  end
+
+  def set_value(aug, entry, attr, value)
+    if value != :absent
+      aug.set(entry + "/#{attr}", value)
+    else
+      aug.rm(entry + "/#{attr}")
+    end
   end
 end
