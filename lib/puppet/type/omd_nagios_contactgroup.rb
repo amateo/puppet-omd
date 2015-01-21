@@ -23,6 +23,8 @@ Puppet::Type.newtype(:omd_nagios_contactgroup) do
     munge do |value|
       if value == 'absent' or value == :absent
         return :absent
+      elsif value == ''
+        return :absent
       else
         return value
       end
