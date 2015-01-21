@@ -16,7 +16,7 @@ Puppet::Type.newtype(:omd_nagios_host) do
       if @should and @should[0] == :absent
         :absent
       else
-        @should[0]
+        @should.join(',')
       end
     end
 
