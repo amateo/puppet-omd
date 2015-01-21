@@ -7,6 +7,28 @@ Puppet::Type.newtype(:omd_nagios_contactgroup) do
 
   ensurable
 
+  class ContactGroupParam < Puppet::Property
+    class << self
+      attr_accessor :boundaries, :default
+    end
+
+    def should
+      if @should and @should[0] == :absent
+        :absent
+      else
+        @should[0]
+      end
+    end
+
+    munge do |value|
+      if value == 'absent' or value == :absent
+        return :absent
+      else
+        return value
+      end
+    end
+  end
+
   newparam(:name) do
     desc "The name of the puppet's nagios contactgroup resource"
     isnamevar
@@ -21,24 +43,24 @@ Puppet::Type.newtype(:omd_nagios_contactgroup) do
     end
   end
 
-  newproperty(:contactgroup_name) do
+  newproperty(:contactgroup_name, :parent => ContactGroupParam) do
     desc 'The name of this nagios_contactgroup resource.'
     defaultto { @resource[:name] }
   end
 
-  newproperty(:nagios_alias) do
+  newproperty(:nagios_alias, :parent => ContactGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:contactgroup_members) do
+  newproperty(:contactgroup_members, :parent => ContactGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:members) do
+  newproperty(:members, :parent => ContactGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:register) do
+  newproperty(:register, :parent => ContactGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 
@@ -53,7 +75,7 @@ Puppet::Type.newtype(:omd_nagios_contactgroup) do
     end
   end
 
-  newproperty(:use) do
+  newproperty(:use, :parent => ContactGroupParam) do
     desc 'Nagios configuration file parameter.'
   end
 end

@@ -7,6 +7,28 @@ Puppet::Type.newtype(:omd_nagios_contact) do
 
   ensurable
 
+  class ContactParam < Puppet::Property
+    class << self
+      attr_accessor :boundaries, :default
+    end
+
+    def should
+      if @should and @should[0] == :absent
+        :absent
+      else
+        @should[0]
+      end
+    end
+
+    munge do |value|
+      if value == 'absent' or value == :absent
+        return :absent
+      else
+        return value
+      end
+    end
+  end
+
   newparam(:name) do
     desc "The name of the puppet's nagios contact resource"
     isnamevar
@@ -21,108 +43,108 @@ Puppet::Type.newtype(:omd_nagios_contact) do
     end
   end
 
-  newproperty(:contact_name) do
+  newproperty(:contact_name, :parent => ContactParam) do
     desc 'The name of this nagios_contact resource.'
     defaultto { @resource[:name] }
   end
 
-  newproperty(:address1) do
+  newproperty(:address1, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:address2) do
+  newproperty(:address2, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:address3) do
+  newproperty(:address3, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:address4) do
+  newproperty(:address4, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:address5) do
+  newproperty(:address5, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:address6) do
+  newproperty(:address6, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:nagios_alias) do
+  newproperty(:nagios_alias, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:can_submit_commands) do
+  newproperty(:can_submit_commands, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:contactgroups) do
+  newproperty(:contactgroups, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:email) do
+  newproperty(:email, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:group) do
+  newproperty(:group, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:host_notification_commands) do
+  newproperty(:host_notification_commands, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:host_notification_options) do
+  newproperty(:host_notification_options, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:host_notification_period) do
+  newproperty(:host_notification_period, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:host_notifications_enabled) do
+  newproperty(:host_notifications_enabled, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:mode) do
+  newproperty(:mode, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:owner) do
+  newproperty(:owner, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:pager) do
+  newproperty(:pager, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:register) do
+  newproperty(:register, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:retain_nonstatus_information) do
+  newproperty(:retain_nonstatus_information, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:retain_status_information) do
+  newproperty(:retain_status_information, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:service_notification_commands) do
+  newproperty(:service_notification_commands, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:service_notification_options) do
+  newproperty(:service_notification_options, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:service_notification_period) do
+  newproperty(:service_notification_period, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:service_notifications_enabled) do
+  newproperty(:service_notifications_enabled, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
@@ -137,7 +159,7 @@ Puppet::Type.newtype(:omd_nagios_contact) do
     end
   end
 
-  newproperty(:use) do
+  newproperty(:use, :parent => ContactParam) do
     desc 'Nagios configuration file parameter.'
   end
 
