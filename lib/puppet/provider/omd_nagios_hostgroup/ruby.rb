@@ -193,7 +193,7 @@ Puppet::Type.type(:omd_nagios_hostgroup).provide(:ruby) do
     set_value(aug, entry, 'name', @resource[:name]) if @resource[:name]
     set_value(aug, entry, 'hostgroup_name', @resource[:hostgroup_name]) if @resource[:hostgroup_name]
     set_value(aug, entry, 'action_url', @resource[:action_url]) if @resource[:action_url]
-    set_value(aug, entry, 'alias', @resource[:alias]) if @resource[:alias]
+    set_value(aug, entry, 'alias', @resource[:nagios_alias]) if @resource[:nagios_alias]
     set_value(aug, entry, 'hostgroup_members', @resource[:hostgroup_members]) if @resource[:hostgroup_members]
     set_value(aug, entry, 'members', @resource[:members]) if @resource[:members]
     set_value(aug, entry, 'notes', @resource[:notes]) if @resource[:notes]

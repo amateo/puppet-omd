@@ -188,7 +188,7 @@ Puppet::Type.type(:omd_nagios_contactgroup).provide(:ruby) do
 
   def save_with_augeas(aug, entry)
     set_value(aug, entry, 'contactgroup_name', @resource[:contactgroup_name]) if @resource[:contactgroup_name]
-    set_value(aug, entry, 'alias', @resource[:alias]) if @resource[:alias]
+    set_value(aug, entry, 'alias', @resource[:nagios_alias]) if @resource[:nagios_alias]
     set_value(aug, entry, 'contactgroup_members', @resource[:contactgroup_members]) if @resource[:contactgroup_members]
     set_value(aug, entry, 'members', @resource[:members]) if @resource[:members]
     set_value(aug, entry, 'register', @resource[:register]) if @resource[:register]

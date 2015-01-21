@@ -233,7 +233,7 @@ Puppet::Type.type(:omd_nagios_host).provide(:ruby) do
     set_value(aug, entry, 'action_url', @resource[:action_url]) if @resource[:action_url]
     set_value(aug, entry, 'active_checks_enabled', @resource[:active_checks_enabled]) if @resource[:active_checks_enabled]
     set_value(aug, entry, 'address', @resource[:address]) if @resource[:address]
-    set_value(aug, entry, 'alias', @resource[:alias]) if @resource[:alias]
+    set_value(aug, entry, 'alias', @resource[:nagios_alias]) if @resource[:nagios_alias]
     set_value(aug, entry, 'business_impact', @resource[:business_impact]) if @resource[:business_impact]
     set_value(aug, entry, 'check_command', @resource[:check_command]) if @resource[:check_command]
     set_value(aug, entry, 'check_freshness', @resource[:check_freshness]) if @resource[:check_freshness]

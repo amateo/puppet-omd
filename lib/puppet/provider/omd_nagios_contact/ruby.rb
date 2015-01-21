@@ -214,7 +214,7 @@ Puppet::Type.type(:omd_nagios_contact).provide(:ruby) do
     set_value(aug, entry, 'address4', @resource[:address4]) if @resource[:address4]
     set_value(aug, entry, 'address5', @resource[:address5]) if @resource[:address5]
     set_value(aug, entry, 'address6', @resource[:address6]) if @resource[:address6]
-    set_value(aug, entry, 'alias', @resource[:alias]) if @resource[:alias]
+    set_value(aug, entry, 'alias', @resource[:nagios_alias]) if @resource[:nagios_alias]
     set_value(aug, entry, 'can_submit_commands', @resource[:can_submit_commands]) if @resource[:can_submit_commands]
     set_value(aug, entry, 'contactgroups', @resource[:contactgroups]) if @resource[:contactgroups]
     set_value(aug, entry, 'email', @resource[:email]) if @resource[:email]
