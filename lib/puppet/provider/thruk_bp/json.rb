@@ -55,7 +55,6 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   end
 
   def flush
-    #save_to_disk
     if @property_flush[:ensure] == :absent
       File.delete(@property_hash[:target]) if File.file?(@property_hash[:target])
       File.delete(@property_hash[:bp_target]) if File.file?(@property_hash[:bp_target])
