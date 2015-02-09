@@ -9,7 +9,7 @@ end
 
 
 Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
-  #confine :feature => :json
+  confine :feature => :json
   defaultfor :osfamily => :debian
   include Puppet_X::Omd::Thruk
 
@@ -116,7 +116,6 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
       raise Puppet::Error, "Can't create " + self.class.bp_internal_path + ' directory. It already exists as file'
     end
     filename = @property_hash[:target]
-    puts JSON.pretty_generate(@property_hash)
     File.open(filename, 'w') do |f|
       f.puts JSON.pretty_generate(@property_hash)
     end
