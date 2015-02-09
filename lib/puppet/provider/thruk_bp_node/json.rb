@@ -36,13 +36,6 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
   end
 
   def self.instances
-    #ins = []
-    #self.get_files.collect do |f|
-      #self.load_from_file(f).collect do |node|
-        #ins.push(new(node))
-      #end
-    #end
-    #return ins
     self.load_nodes.collect do |node|
       new(node)
     end
@@ -77,6 +70,8 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
       end
       to_json(parent)
     rescue
+      # Si la sicronización al .tbp falla, entonces borro el json del node.
+      # Así la próxima vez volverá a ejecutarse
       File.delete(@property_hash[:target])
       fail("Fail synchronizing Thruk_bp_node[#{@property_hash[:name]}]")
     end
@@ -120,147 +115,4 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
       f.puts JSON.pretty_generate(@property_hash)
     end
   end
-
-
-  ##
-  #####################################################
-  ## Aux
-  ##
-  
-  #def self.get_files
-    #files = Array.new
-    #Dir['/omd/sites/*'].each do |d|
-      #if File.directory?(d + '/etc/thruk/bp')
-        #files += Dir[d + '/etc/thruk/bp/*.tbp']
-      #end
-    #end
-    #return files
-  #end
-
-  #def self.load_from_file(filename)
-    #site = filename.split('/')[3]
-    #json = JSON.load(File.read(filename))
-    #return [] if !json.has_key?('nodes')
-    #bpnodes = []
-    #nodes = json['nodes']
-    #index = 0
-    #nodes.each do |node|
-      #bpnode = {}
-      #bpnode[:ensure]   = :present
-      #bpnode[:json]     = json
-      #bpnode[:site]     = site
-      #bpnode[:bp]       = nodes[0]['label']
-      #bpnode[:name]     = site + '/' + bpnode[:bp] + '/' + node['id']
-      #bpnode[:target]   = filename
-      #bpnode[:id]       = node['id']
-      #bpnode[:label]    = node['label'] if node['label']
-      #bpnode[:function] = node['function'] if node['function']
-      #bpnode[:index]    = index
-      ## Buscamos si algún otro nodo depende de este
-      #nodes.each do |node2|
-        #if node2['depends'] and node2['depends'].include?(node['id'])
-          #bpnode[:parent] = node2['id']
-          #break
-        #end
-      #end
-      #bpnodes.push(bpnode)
-      #index += 1
-    #end
-    #bpnodes
-  #end
-
-  #def flush_disk
-    #raise Puppet::Error, 'You must provide a site parameter' if !resource[:site]
-    ## Load JSON file
-    #filename = resource[:target] ? @property_hash[:target] : get_filename
-    #if !filename
-      #raise Puppet::Error, "Can't find BP for " + resource[:name]
-    #end
-    #File.open(@property_hash[:target], 'w') do |f|
-      #f.puts JSON.pretty_generate(@property_hash[:json])
-    #end
-  #end
-
-  #def get_filename
-    #dir = '/omd/sites/' + resource[:site] + '/etc/thruk/bp'
-    #Dir[dir + '/*'].each do |f|
-      #json = JSON.load(File.read(f))
-      #json['nodes'].each do |node|
-        #if node['label'] == resource[:bp]
-          #return f
-        #end
-      #end
-    #end
-    #return nil
-  #end
-
-  #def find_index(json, id)
-    #return nil if !json.has_key?('nodes')
-    #index = 0
-    #json['nodes'].each do |node|
-      #if node['id'] == id
-        #return index
-      #end
-      #index += 1
-    #end
-    #return nil
-  #end
-
-  #def modify_parents(json, oldid, newid)
-    #json['nodes'].collect do |node|
-      #if node.has_key?('depends') and node['depends'].include?(oldid)
-        #node['depends'].delete(oldid)
-        #node['depends'].push(newid)
-      #end
-    #end
-    #json
-  #end
-
-  #def switch_parent(json, old, new)
-    #json['nodes'].collect do |node|
-      #if node['id'] == old
-        #node['depends'].delete(resource[:id])
-      #elsif node['id'] == new
-        #node['depends'].push(resource[:id])
-      #end
-    #end
-    #json
-  #end
-
-  #def include_in_parent(json, id)
-    #json['nodes'].collect do |node|
-      #if node['id'] == id
-        #node['depends'].push(resource[:id])
-      #end
-    #end
-    #json
-  #end
-
-  #def modify_json
-    ## Recargamos el json por si ha habido cambios de otros resources
-    #json = JSON.load(File.read(@property_hash[:target]))
-    #index = find_index(json, @property_hash[:id])
-    #if index != nil
-      #json['nodes'][index]['label'] = @property_flush[:label] if @property_flush[:label]
-      #json['nodes'][index]['function'] = @property_flush[:function] if @property_flush[:function]
-      #if @property_flush[:id]
-        #json['nodes'][index]['id'] = @property_flush[:id]
-        #json = modify_parents(json, @property_hash[:id], @property_flush[:id])
-      #end
-      #if @property_flush[:parent]
-        #json = switch_parent(json, @property_hash[:parent], @property_flush[:parent])
-      #end
-    #else
-      ## Es un thruk_bp_node nuevo
-      #newnode = {}
-      #newnode['label'] = @property_flush[:label] if @property_flush[:label]
-      #newnode['function'] = @property_flush[:function] if @property_flush[:function]
-      #newnode['id'] = @property_flush[:id] if @property_flush[:id]
-      #if @property_flush[:parent]
-        #include_in_parent(json, @property_flush[:parent])
-      #end
-      #json['nodes'].push(newnode)
-    #end
-    #@property_hash[:json] = json
-  #end
 end
