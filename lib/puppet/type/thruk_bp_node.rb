@@ -10,7 +10,14 @@ Puppet::Type.newtype(:thruk_bp_node) do
 
   newproperty(:site) do
     desc "site"
-    defaultto do :absent end
+    defaultto do
+      if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
+        site, bp, id = match.captures
+        site
+      else
+        :absent
+      end
+    end
     validate do |value|
       raise Puppet::Error, "Thruk_bp_node[#{@resource[:name]}]: 'site' parameter is mandatory" if value == :absent
     end
@@ -18,7 +25,14 @@ Puppet::Type.newtype(:thruk_bp_node) do
 
   newproperty(:bp) do
     desc "bp"
-    defaultto do :absent end
+    defaultto do
+      if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
+        site, bp, id = match.captures
+        bp
+      else
+        :absent
+      end
+    end
     validate do |value|
       raise Puppet::Error, "Thruk_bp_node[#{@resource[:name]}]: 'bp' parameter is mandatory" if value == :absent
     end
@@ -26,7 +40,14 @@ Puppet::Type.newtype(:thruk_bp_node) do
 
   newproperty(:id) do
     desc 'Id'
-    defaultto do :absent end
+    defaultto do
+      if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
+        site, bp, id = match.captures
+        id
+      else
+        :absent
+      end
+    end
     validate do |value|
       raise Puppet::Error, "Thruk_bp_node[#{@resource[:name]}]: 'id' parameter is mandatory" if value == :absent
     end
