@@ -31,7 +31,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
     @property_hash[:function] = resource[:function]
     @property_hash[:service_template] = resource[:service_template] if resource[:service_template]
     @property_hash[:bp_target] = get_new_filename(self.class.config_path(resource[:site]))
-    @property_hash[:target] = self.class.bp_internal_path + '/bp_' + resource[:name].gsub(' ', '_') + '.json'
+    @property_hash[:target] = get_bp_filename(resource[:name])
     @property_hash[:name] = resource[:name]
   end
 

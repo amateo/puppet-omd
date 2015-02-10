@@ -32,7 +32,7 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
     @property_hash[:label] = resource[:label]
     @property_hash[:parent] = resource[:parent]
     @property_hash[:function] = resource[:function]
-    @property_hash[:target] = self.class.bp_internal_path + '/node_' + resource[:name].gsub(' ', '_') + '.json'
+    @property_hash[:target] = get_node_filename(resource[:name])
   end
 
   def self.instances

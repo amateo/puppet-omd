@@ -19,7 +19,7 @@ Puppet::Type.newtype(:thruk_bp_node) do
       end
     end
     validate do |value|
-      raise Puppet::Error, "Thruk_bp_node[#{@resource[:name]}]: 'site' parameter is mandatory" if value == :absent
+      raise ArgumentError, "Thruk_bp_node[#{@resource[:name]}]: 'site' parameter is mandatory" if value == :absent
     end
   end
 
@@ -34,7 +34,7 @@ Puppet::Type.newtype(:thruk_bp_node) do
       end
     end
     validate do |value|
-      raise Puppet::Error, "Thruk_bp_node[#{@resource[:name]}]: 'bp' parameter is mandatory" if value == :absent
+      raise ArgumentError, "Thruk_bp_node[#{@resource[:name]}]: 'bp' parameter is mandatory" if value == :absent
     end
   end
 
@@ -45,11 +45,11 @@ Puppet::Type.newtype(:thruk_bp_node) do
         site, bp, id = match.captures
         id
       else
-        :absent
+        @resource[:name]
       end
     end
     validate do |value|
-      raise Puppet::Error, "Thruk_bp_node[#{@resource[:name]}]: 'id' parameter is mandatory" if value == :absent
+      raise ArgumentError, "Thruk_bp_node[#{@resource[:name]}]: 'id' parameter is mandatory" if value == :absent
     end
   end
 
@@ -73,9 +73,7 @@ Puppet::Type.newtype(:thruk_bp_node) do
   end
 
   autorequire(:thruk_bp) do
-    if not catalog.resource("Thruk_bp[#{self[:bp]}]") then
-      err "There is no Thruk_bp resource named #{self[:bp]}."
-    end
     [ self[:bp] ]
   end
+
 end

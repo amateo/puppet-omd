@@ -61,6 +61,19 @@ module Puppet_X
         return '/var/lib/puppet/thruk'
       end
 
+      def get_bp_filename(name)
+        bp_internal_path + '/bp_' + escape_filename(name) + '.json'
+      end
+
+      def get_node_filename(name)
+        bp_internal_path + '/node_' + escape_filename(name) + '.json'
+      end
+
+      def escape_filename(name)
+        filename = name.gsub(' ', '_').gsub('/', '_')
+        filename
+      end
+
     end
   end
 end
