@@ -10,38 +10,47 @@ Puppet::Type.newtype(:thruk_bp_node) do
 
   newproperty(:site) do
     desc "site"
-    defaultto {
+    defaultto do
       if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
         site, bp, id = match.captures
         site
       else
-        ''
+        :absent
       end
-    }
+    end
+    validate do |value|
+      raise ArgumentError, "Thruk_bp_node[#{@resource[:name]}]: 'site' parameter is mandatory" if value == :absent
+    end
   end
 
   newproperty(:bp) do
     desc "bp"
-    defaultto {
+    defaultto do
       if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
         site, bp, id = match.captures
         bp
       else
-        ''
+        :absent
       end
-    }
+    end
+    validate do |value|
+      raise ArgumentError, "Thruk_bp_node[#{@resource[:name]}]: 'bp' parameter is mandatory" if value == :absent
+    end
   end
 
   newproperty(:id) do
     desc 'Id'
-    defaultto {
+    defaultto do
       if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
         site, bp, id = match.captures
         id
       else
-        ''
+        @resource[:name]
       end
-    }
+    end
+    validate do |value|
+      raise ArgumentError, "Thruk_bp_node[#{@resource[:name]}]: 'id' parameter is mandatory" if value == :absent
+    end
   end
 
   newproperty(:label) do
@@ -62,4 +71,9 @@ Puppet::Type.newtype(:thruk_bp_node) do
   newparam(:target) do
     desc 'The file to store the BP definition'
   end
+
+  autorequire(:thruk_bp) do
+    [ self[:bp] ]
+  end
+
 end

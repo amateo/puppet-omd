@@ -1,13 +1,21 @@
 require 'json'
-require 'yaml'
+
+begin
+  require 'puppet_x/omd/thruk'
+rescue
+  libdir = Pathname.new(__FILE__).parent.parent.parent.parent
+  require File.join(libdir, 'puppet_x/omd/thruk')
+end
 
 Puppet::Type.type(:thruk_bp).provide(:ruby) do
+  confine :feature => :json
   defaultfor :osfamily => :debian
+  include Puppet_X::Omd::Thruk
 
   mk_resource_methods
   
   def exists?
-    @property_hash[:ensure] == :present
+    return !@property_hash.empty?
   end
 
   def destroy
@@ -15,13 +23,21 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   end
 
   def create
-    @property_flush[:ensure] = :present
+    @property_hash[:state_type] = resource[:state_type]
+    @property_hash[:site] = resource[:site]
+    @property_hash[:host_template] = resource[:host_template] if resource[:host_template]
+    @property_hash[:rank_dir] = resource[:rank_dir]
+    @property_hash[:host_name] = resource[:host_name]
+    @property_hash[:function] = resource[:function]
+    @property_hash[:service_template] = resource[:service_template] if resource[:service_template]
+    @property_hash[:bp_target] = get_new_filename(self.class.config_path(resource[:site]))
+    @property_hash[:target] = get_bp_filename(resource[:name])
+    @property_hash[:name] = resource[:name]
   end
 
   def self.instances
-    self.get_files.collect do |f|
-      bp_properties = self.load_from_file(f)
-      new(bp_properties)
+    self.load_bps.collect do |bp|
+      new(bp)
     end
   end
 
@@ -39,108 +55,73 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   end
 
   def flush
-    save_to_disk
+    if @property_flush[:ensure] == :absent
+      File.delete(@property_hash[:target]) if File.file?(@property_hash[:target])
+      File.delete(@property_hash[:bp_target]) if File.file?(@property_hash[:bp_target])
+      @property_hash = []
+    else
+      flush_json
+
+      # Collect the resources again once they've been changed (that way `puppet
+      # resource` will show the correct values after changes have been made).
+      @property_hash = self.class.load_bp(@property_hash[:target])
+
+      to_json(@property_hash)
+    end
     save_nagios_objects
     ensure_cron
-
-    # Collect the resources again once they've been changed (that way `puppet
-    # resource` will show the correct values after changes have been made).
-    @property_hash = self.class.load_from_file(@property_hash[:target])
   end
-
-
 
   #
   #################################################################
   #
   
-  def to_hash
-    hash = Hash.new
-    hash['rankDir'] = resource[:rank_dir]
-    hash['state_type'] = resource[:state_type]
-    hash['name'] = resource[:host_name]
-    hash['template'] = resource[:host_template] if resource[:host_template]
-    if @property_hash.has_key?(:nodes)
-      hash['nodes'] = @property_hash[:nodes]
-      hash['nodes'].collect! do |node|
-        if node['id'] == 'node1'
-          node['template'] = resource[:service_template] if resource[:service_template]
-          node
-        else
-          node
-        end
-      end
-    else
-      node = {
-        'function' => resource[:function],
-        'label'    => resource[:name],
-        'id'       => 'node1',
-        'template' => resource[:service_template],
-      }
-      node['template'] = resource[:service_template] if resource[:service_template]
-      hash['nodes'] = [ node ]
-    end
-    return hash
+  def self.config_path(site)
+    return '/omd/sites/' + site + '/etc/thruk/bp'
   end
 
-  def get_filename
-    if @property_hash.has_key?(:target)
-      return @property_hash[:target]
-    else
-      dir = '/omd/sites/' + resource[:site] + '/etc/thruk/bp'
-      raise Puppet::Error, 'Directory ' + dir + ' does not exists!!!' if !File.directory?(dir)
-      files = Dir[dir + '/*.tbp'].collect! do |x|
-        x = File.basename(x).split('.')[0]
-      end
-      @property_hash[:target] = dir + '/' + (files.sort_by(&:to_i)[files.length-1].to_i + 1).to_s + '.tbp'
-      return @property_hash[:target]
-    end
+  def self.bp_internal_path
+    return '/var/lib/puppet/thruk'
   end
 
-  #
-  #########################################################
-  # Para el self.instances
-  #
-
-  def self.get_files
-    files = Array.new
-    Dir['/omd/sites/*'].each do |d|
-      if File.directory?(d + '/etc/thruk/bp')
-        files += Dir[d + '/etc/thruk/bp/*.tbp']
-      end
+  def get_new_filename(path)
+    raise Puppet::Error, 'Directory ' + dir + ' does not exists!!!' if !File.directory?(path)
+    i = 1
+    filename = path + '/' + i.to_s + '.tbp'
+    while File.file?(filename)
+      i += 1
+      filename = path + '/' + i.to_s + '.tbp'
     end
-    return files
+    return filename
   end
 
-  def self.load_from_file(filename)
-    if File.exists?(filename)
-      hash_tmp = JSON.load(File.read(filename))
-      hash = Hash.new
-      hash[:ensure] = :present
-      hash[:rank_dir] = hash_tmp['rankDir']
-      hash[:host_template] = hash_tmp['template']
-      hash[:state_type] = hash_tmp['state_type']
-      hash[:name] = hash_tmp['nodes'][0]['label']
-      hash[:function] = hash_tmp['nodes'][0]['function']
-      hash[:target] = filename
-      hash[:site] = filename.split('/')[3]
-      hash[:nodes] = hash_tmp['nodes']
-      hash[:host_name] = hash_tmp['name']
-      hash[:service_template] = hash_tmp['nodes'][0]['template'] if hash_tmp['nodes'][0].has_key?('template')
-      return hash
-    else
+  def self.load_bps
+    bps = []
+    Dir[bp_internal_path + '/bp_*.json'].each do |f|
+      @property_hash = JSON.parse(File.read(f), { :symbolize_names => true })
+      bps.push(@property_hash)
+    end
+    bps
+  end
+
+  def self.load_bp(filename)
+    begin
+      json = JSON.parse(File.read(filename), { :symbolize_names => true })
+      return json
+    rescue
       return nil
     end
   end
 
-  def save_to_disk
-    raise Puppet::Error, 'You must provide a site paramater' if !resource[:site]
-    if @property_flush[:ensure] == :absent
-      File.delete(@property_hash[:target])
-    else
-      file = File.open(get_filename, 'w')
-      file.write(JSON.pretty_generate(to_hash))
-      file.close
+  def flush_json
+    if !File.directory?(self.class.bp_internal_path) and !File.file?(self.class.bp_internal_path)
+      Dir.mkdir(self.class.bp_internal_path)
+    elsif File.file?(self.class.bp_internal_path)
+      raise Puppet::Error, "Can't create " + self.class.bp_internal_path + ' directory. It already exists as file'
+    end
+    filename = @property_hash[:target]
+    File.open(filename, 'w') do |f|
+      f.puts JSON.pretty_generate(@property_hash)
     end
   end
 
@@ -151,7 +132,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
     aug.transform(:lens => "nagiosobjects.lns", :incl => path)
     aug.load
 
-    if match = get_filename.match(/^.+\/([^\/]+)\.tbp/)
+    if match = @property_hash[:bp_target].match(/^.+\/([^\/]+)\.tbp/)
       bp_id = match[1]
     end
     host_entry = nil
