@@ -28,6 +28,7 @@ module Puppet_X
           n_hash[:function] = n[:function]
           n_hash[:label] = n[:label]
           n_hash[:id] = n[:id]
+          n_hash[:depends] = nodes[:depends][n[:id]] if nodes[:depends][n[:id]]
           json[:nodes].push(n_hash)
         end
         File.open(bp[:bp_target], 'w') do |f|
