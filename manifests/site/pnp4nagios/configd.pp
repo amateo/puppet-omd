@@ -39,7 +39,7 @@ define omd::site::pnp4nagios::configd (
   $_content = $content ? {
     undef   => $config ? {
       undef   => undef,
-      default => configd($config),
+      default => template($config),
     },
     default => $content,
   }
