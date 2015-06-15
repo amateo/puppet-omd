@@ -32,8 +32,8 @@ define omd::site::pnp4nagios::configd (
   $sitedir = "/omd/sites/${site}"
 
   $_path = $path ? {
-    undef => $path,
-    default => "${sitedir}/etc/pnp4nagios/config.d/${_config_name}",
+    undef => "${sitedir}/etc/pnp4nagios/config.d/${_config_name}",
+    default => $path,
   }
 
   $_content = $content ? {
