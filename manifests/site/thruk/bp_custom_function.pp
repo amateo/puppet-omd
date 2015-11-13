@@ -46,6 +46,7 @@ define omd::site::thruk::bp_custom_function (
     mode    => $mode,
     source  => $source,
     content => $_content,
+    notify  => Omd::Site::Service[$site],
   }
 }
 
