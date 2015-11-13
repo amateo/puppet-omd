@@ -9,7 +9,7 @@ define omd::site::thruk::bp_custom_function (
   $mode     = '0644',
   $path     = undef,
 ) {
-  if !$source and !$content and !$template {
+  if $ensure != 'absent' and !$source and !$content and !$template {
     fail('You must provide one of source, content or template parameters')
   }
 
