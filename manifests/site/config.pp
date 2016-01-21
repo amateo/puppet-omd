@@ -89,7 +89,7 @@ define omd::site::config (
     owner   => $site,
     group   => $site,
     mode    => '0644',
-    content => template('omd/site/apache.conf.erb'),
+    content => template("omd/site/apache.conf_${::lsbdistcodename}.erb"),
   }
 
   if $auth_options and $mode == 'own' {
