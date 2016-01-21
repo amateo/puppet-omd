@@ -54,8 +54,8 @@ define omd::site (
   validate_re($mode, '^(none|own|shared)$',
     'mode parameter must be one of \'none\', \'own\' or \'shared\'')
 
-  validate_re($core, '^(nagios)$',
-    'At this moment, only nagios core is supported')
+  validate_re($core, '^(none|nagios)$',
+    'core parameter must be one of \'none\' or \'nagios\'')
 
   validate_re($livestatus, '^(on|off)$',
     'livestatus parameter must be \'on\' or \'off\'')
