@@ -47,34 +47,46 @@ define omd::site::config (
   # Configuration
   #
 
-  file {"${site}_02_fcgid.conf":
-    ensure  => $ensure,
-    path    => "${sitedir}/etc/apache/conf.d/02_fcgid.conf",
-    owner   => $site,
-    group   => $site,
-    mode    => '0644',
-    content => template($fcgid_template),
-  }
+  if $mode != 'none' {
+    file {"${site}_02_fcgid.conf":
+      ensure  => $ensure,
+      path    => "${sitedir}/etc/apache/conf.d/02_fcgid.conf",
+      owner   => $site,
+      group   => $site,
+      mode    => '0644',
+      content => template($fcgid_template),
+    }
 
+    #
+    # Fichero leído por el apache global que determina el modo de ejecución
+    # del site
+    #
+    file { "${sitedir}/etc/apache/mode.conf":
+      ensure => $_link_ensure,
+      target => "mode_${mode}_${site}.conf",
+      notify => Class['apache::service'],
+    }
 
-  #
-  # Fichero leído por el apache global que determina el modo de ejecución
-  # del site
-  #
-  file { "${sitedir}/etc/apache/mode.conf":
-    ensure => $_link_ensure,
-    target => "mode_${mode}_${site}.conf",
-    notify => Class['apache::service'],
-  }
+    apache::dotconf { "mode_${mode}_${site}":
+      ensure   => $ensure,
+      path     => "${sitedir}/etc/apache",
+      owner    => $site,
+      group    => $site,
+      mode     => '0644',
+      template => "omd/site/mode_${mode}.conf.erb",
+      require  => File["${sitedir}/etc/apache/mode.conf"],
+    }
+  } else {
+    file { "${sitedir}/etc/apache/mode.conf":
+      ensure  => 'file',
+      content => '',
+      notify  => Exec["${site}_reload_apache"],
+    }
 
-  apache::dotconf { "mode_${mode}_${site}":
-    ensure   => $ensure,
-    path     => "${sitedir}/etc/apache",
-    owner    => $site,
-    group    => $site,
-    mode     => '0644',
-    template => "omd/site/mode_${mode}.conf.erb",
-    require  => File["${sitedir}/etc/apache/mode.conf"],
+    exec{"${site}_reload_apache":
+      command     => '/etc/init.d/apache reload',
+      refreshonly => true,
+    }
   }
 
   #

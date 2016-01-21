@@ -51,8 +51,8 @@ define omd::site (
   validate_re($ensure, '^(present|absent)$',
     'ensure parameter must be one of \'present\' or \'absent\'')
 
-  validate_re($mode, '^(own|shared)$',
-    'mode parameter must be one of \'own\' or \'shared\'')
+  validate_re($mode, '^(none|own|shared)$',
+    'mode parameter must be one of \'none\', \'own\' or \'shared\'')
 
   validate_re($core, '^(nagios)$',
     'At this moment, only nagios core is supported')
