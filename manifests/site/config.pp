@@ -119,39 +119,39 @@ define omd::site::config (
   #
   # Configuración del etc/omd/site.conf
   #
-  augeas { "${site}_defaultgui":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_DEFAULT_GUI ${defaultgui}",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
+  shellvar { "${site}_defaultgui":
+    variable => 'CONFIG_DEFAULT_GUI',
+    value    => $defaultgui,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
   }
 
-  augeas { "${site}_apache_mode":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_APACHE_MODE ${mode}",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
+  shellvar { "${site}_apache_mode":
+    variable => 'CONFIG_APACHE_MODE',
+    value    => $mode,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
   }
 
-  augeas { "${site}_core":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_CORE '${core}'",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
+  shellvar { "${site}_core":
+    variable => 'CONFIG_CORE',
+    value    => $core,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
   }
 
-  augeas { "${site}_livestatus_tcp":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_LIVESTATUS_TCP '${livestatus}'",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
+  shellvar { "${site}_livestatus_tcp":
+    variable => 'CONFIG_LIVESTATUS_TCP',
+    value    => $livestatus,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
   }
 
-  augeas { "${site}_livestatus_tcp_port":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_LIVESTATUS_TCP_PORT '${livestatus_port}'",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
+  shellvar { "${site}_livestatus_tcp_port":
+    variable => 'CONFIG_LIVESTATUS_TCP_PORT',
+    value    => $livestatus_port,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
   }
 
   if $ensure == 'present' {
