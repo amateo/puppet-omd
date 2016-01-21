@@ -6,7 +6,7 @@ class omd::install::debian {
     location => $omd::params::repo,
     release  => $::lsbdistcodename,
     repos    => 'main',
-    key      => false,
+    key      => $omd::key,
     include  => {
       'src' => false,
     },
