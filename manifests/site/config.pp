@@ -13,7 +13,9 @@ define omd::site::config (
   $livestatus_peers    = undef,
   $nagios_options      = undef,
   $gearman_server      = undef,
+  $gearman_worker      = undef,
   $gearmand_port       = undef,
+  $gearman_key         = undef,
 ) {
 
   if $livestatus_peers {
@@ -179,6 +181,17 @@ define omd::site::config (
     target   => "${sitedir}/etc/omd/site.conf",
   }
 
+  $gearman_worker_v = $gearman_worker ? {
+    true    => 'on',
+    default => 'off',
+  }
+  shellvar {"${site}_gearman_worker":
+    variable => 'CONFIG_GEARMAN_WORKER',
+    value    => $gearman_worker_v,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
+  }
+
   $gearmand_port_value = $gearmand_port ? {
     undef   => 'localhost:4730',
     default => $gearmand_port,
@@ -195,7 +208,7 @@ define omd::site::config (
     target   => "${sitedir}/etc/mod-gearman/port.conf",
   }
 
-  if $gearman_server == true {
+  if $gearman_server == true or $gearman_worker == true {
     $mod_gearman_value = 'on'
   } else {
     $mod_gearman_value = 'off'
@@ -205,6 +218,17 @@ define omd::site::config (
     value    => $mod_gearman_value,
     quoted   => 'single',
     target   => "${sitedir}/etc/omd/site.conf",
+  }
+
+  if $gearman_key {
+    file {"${site}_gearman_secret.key":
+      ensure  => 'file',
+      path    => "${sitedir}/etc/mod-gearman/secret.key",
+      owner   => $sitename,
+      group   => $sitename,
+      mode    => '0640',
+      content => $gearman_key,
+    }
   }
 
   if $ensure == 'present' {
