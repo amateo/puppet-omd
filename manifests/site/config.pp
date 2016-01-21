@@ -12,6 +12,8 @@ define omd::site::config (
   $livestatus_port     = 6557,
   $livestatus_peers    = undef,
   $nagios_options      = undef,
+  $gearman_server      = undef,
+  $gearmand_port       = undef,
 ) {
 
   if $livestatus_peers {
@@ -150,6 +152,45 @@ define omd::site::config (
   shellvar { "${site}_livestatus_tcp_port":
     variable => 'CONFIG_LIVESTATUS_TCP_PORT',
     value    => $livestatus_port,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
+  }
+
+  $gearmand = $gearman_server ? {
+    true    => 'on',
+    default => 'off',
+  }
+  shellvar {"${site}_gearmand":
+    variable => 'CONFIG_GEARMAND',
+    value    => $gearmand,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
+  }
+
+  $gearmand_port_value = $gearmand_port ? {
+    undef   => 'localhost:4730',
+    default => $gearmand_port,
+  }
+  shellvar {"${site}_gearmand_port":
+    variable => 'CONFIG_GEARMAND_PORT',
+    value    => $gearmand_port_value,
+    quoted   => 'single',
+    target   => "${sitedir}/etc/omd/site.conf",
+  }
+  shellvar {"${site}_gearmand_port_conf":
+    variable => 'server',
+    value    => $gearmand_port_value,
+    target   => "${sitedir}/etc/mod-gearman/port.conf",
+  }
+
+  if $gearman_server == true {
+    $mod_gearman_value = 'on'
+  } else {
+    $mod_gearman_value = 'off'
+  }
+  shellvar {"${site}_mod_gearman":
+    variable => 'CONFIG_MOD_GEARMAN',
+    value    => $mod_gearman_value,
     quoted   => 'single',
     target   => "${sitedir}/etc/omd/site.conf",
   }

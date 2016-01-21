@@ -44,6 +44,8 @@ define omd::site (
   $livestatus_port     = undef,
   $livestatus_peers    = undef,
   $nagios_options      = undef,
+  $gearman_server      = undef,
+  $gearmand_port       = undef,
 ) {
   # Validación
   validate_re($ensure, '^(present|absent)$',
@@ -83,6 +85,15 @@ define omd::site (
     validate_hash($livestatus_peers)
   }
 
+  if $gearman_server != undef {
+    validate_bool($gearman_server)
+  }
+
+  if $gearmand_port {
+    validate_re($gearmand_port, '^.+:\d+$',
+      "gearmand_port parameter must be a <fqdn>:<port>: ${gearmand_port}")
+  }
+
   $sitename = $site ? {
     ''      => $name,
     default => $site,
@@ -107,6 +118,8 @@ define omd::site (
     livestatus_port     => $livestatus_port,
     livestatus_peers    => $livestatus_peers,
     nagios_options      => $nagios_options,
+    gearman_server      => $gearman_server,
+    gearmand_port       => $gearmand_port,
   } ~>
   ::omd::site::service {$name:
     ensure => $ensure,
