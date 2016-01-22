@@ -210,8 +210,10 @@ define omd::site::config (
 
   if $gearman_server == true or $gearman_worker == true {
     $mod_gearman_value = 'on'
+    $enable_gearman = true
   } else {
     $mod_gearman_value = 'off'
+    $enable_gearman = false
   }
   shellvar {"${site}_mod_gearman":
     variable => 'CONFIG_MOD_GEARMAN',
@@ -235,9 +237,12 @@ define omd::site::config (
     case $core {
       'nagios': {
         anchor {"omd::site::config::${name}::begin": } ->
-        omd::site::nagios { $site: } ~>
+        omd::site::nagios { $site:
+          enable_gearman => $enable_gearman,
+        } ~>
         anchor {"omd::site::config::${name}::end": }
       }
+      default: { }
     }
   }
 

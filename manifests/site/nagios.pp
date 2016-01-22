@@ -1,5 +1,6 @@
 define omd::site::nagios (
   $site = '',
+  $enable_gearman = false,
 ) {
   $sitename = $site ? {
     ''      => $name,
@@ -17,6 +18,17 @@ define omd::site::nagios (
     path        => "/bin:/usr/bin:${sitedir}/bin",
     refreshonly => true,
     onlyif      => "${initdir}/nagios checkconfig",
+  }
+
+  # Inclusión o no de mod-gearman dentro de nagios
+  $gearman_present = $enable_gearman ? {
+    true    => 'link',
+    default => 'absent',
+  }
+  file {"${name} nagios gearman link":
+    ensure => $gearman_present,
+    path   => "${sitedir}/etc/nagios/nagios.d/mod-gearman.cfg",
+    target => '../../mod-gearman/nagios.cfg',
   }
 
   #
