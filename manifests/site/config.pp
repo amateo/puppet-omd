@@ -31,6 +31,11 @@ define omd::site::config (
     default  => 'link',
   }
 
+  $file_ensure = $ensure ? {
+    'present' => 'file',
+    default   => $ensure,
+  }
+
   $cgi_cfg_target = $core ? {
     nagios  => '../nagios/cgi.cfg',
     default => '../nagios/cgi.cfg',
@@ -80,7 +85,7 @@ define omd::site::config (
     }
   } else {
     file { "${sitedir}/etc/apache/mode.conf":
-      ensure  => 'file',
+      ensure  => $file_ensure,
       content => '',
       notify  => Exec["${site}_reload_apache"],
     }
