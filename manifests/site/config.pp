@@ -135,101 +135,103 @@ define omd::site::config (
   #
   # Configuración del etc/omd/site.conf
   #
-  shellvar { "${site}_defaultgui":
-    variable => 'CONFIG_DEFAULT_GUI',
-    value    => $defaultgui,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+  if $ensure == 'present' {
+    shellvar { "${site}_defaultgui":
+      variable => 'CONFIG_DEFAULT_GUI',
+      value    => $defaultgui,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  shellvar { "${site}_apache_mode":
-    variable => 'CONFIG_APACHE_MODE',
-    value    => $mode,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+    shellvar { "${site}_apache_mode":
+      variable => 'CONFIG_APACHE_MODE',
+      value    => $mode,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  shellvar { "${site}_core":
-    variable => 'CONFIG_CORE',
-    value    => $core,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+    shellvar { "${site}_core":
+      variable => 'CONFIG_CORE',
+      value    => $core,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  shellvar { "${site}_livestatus_tcp":
-    variable => 'CONFIG_LIVESTATUS_TCP',
-    value    => $livestatus,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+    shellvar { "${site}_livestatus_tcp":
+      variable => 'CONFIG_LIVESTATUS_TCP',
+      value    => $livestatus,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  shellvar { "${site}_livestatus_tcp_port":
-    variable => 'CONFIG_LIVESTATUS_TCP_PORT',
-    value    => $livestatus_port,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+    shellvar { "${site}_livestatus_tcp_port":
+      variable => 'CONFIG_LIVESTATUS_TCP_PORT',
+      value    => $livestatus_port,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  $gearmand = $gearman_server ? {
-    true    => 'on',
-    default => 'off',
-  }
-  shellvar {"${site}_gearmand":
-    variable => 'CONFIG_GEARMAND',
-    value    => $gearmand,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+    $gearmand = $gearman_server ? {
+      true    => 'on',
+      default => 'off',
+    }
+    shellvar {"${site}_gearmand":
+      variable => 'CONFIG_GEARMAND',
+      value    => $gearmand,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  $gearman_worker_v = $gearman_worker ? {
-    true    => 'on',
-    default => 'off',
-  }
-  shellvar {"${site}_gearman_worker":
-    variable => 'CONFIG_GEARMAN_WORKER',
-    value    => $gearman_worker_v,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+    $gearman_worker_v = $gearman_worker ? {
+      true    => 'on',
+      default => 'off',
+    }
+    shellvar {"${site}_gearman_worker":
+      variable => 'CONFIG_GEARMAN_WORKER',
+      value    => $gearman_worker_v,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  $gearmand_port_value = $gearmand_port ? {
-    undef   => 'localhost:4730',
-    default => $gearmand_port,
-  }
-  shellvar {"${site}_gearmand_port":
-    variable => 'CONFIG_GEARMAND_PORT',
-    value    => $gearmand_port_value,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
-  shellvar {"${site}_gearmand_port_conf":
-    variable => 'server',
-    value    => $gearmand_port_value,
-    target   => "${sitedir}/etc/mod-gearman/port.conf",
-  }
+    $gearmand_port_value = $gearmand_port ? {
+      undef   => 'localhost:4730',
+      default => $gearmand_port,
+    }
+    shellvar {"${site}_gearmand_port":
+      variable => 'CONFIG_GEARMAND_PORT',
+      value    => $gearmand_port_value,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
+    shellvar {"${site}_gearmand_port_conf":
+      variable => 'server',
+      value    => $gearmand_port_value,
+      target   => "${sitedir}/etc/mod-gearman/port.conf",
+    }
 
-  if $gearman_server == true or $gearman_worker == true {
-    $mod_gearman_value = 'on'
-    $enable_gearman = true
-  } else {
-    $mod_gearman_value = 'off'
-    $enable_gearman = false
-  }
-  shellvar {"${site}_mod_gearman":
-    variable => 'CONFIG_MOD_GEARMAN',
-    value    => $mod_gearman_value,
-    quoted   => 'single',
-    target   => "${sitedir}/etc/omd/site.conf",
-  }
+    if $gearman_server == true or $gearman_worker == true {
+      $mod_gearman_value = 'on'
+      $enable_gearman = true
+    } else {
+      $mod_gearman_value = 'off'
+      $enable_gearman = false
+    }
+    shellvar {"${site}_mod_gearman":
+      variable => 'CONFIG_MOD_GEARMAN',
+      value    => $mod_gearman_value,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  if $gearman_key {
-    file {"${site}_gearman_secret.key":
-      ensure  => 'file',
-      path    => "${sitedir}/etc/mod-gearman/secret.key",
-      owner   => $sitename,
-      group   => $sitename,
-      mode    => '0640',
-      content => $gearman_key,
+    if $gearman_key {
+      file {"${site}_gearman_secret.key":
+        ensure  => 'file',
+        path    => "${sitedir}/etc/mod-gearman/secret.key",
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0640',
+        content => $gearman_key,
+      }
     }
   }
 
