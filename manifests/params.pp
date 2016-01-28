@@ -34,6 +34,10 @@ class omd::params {
       $package_provider   = 'apt'
 
       $repo = 'http://labs.consol.de/repo/stable/ubuntu'
+      $key = {
+        'id'     => 'F2F97737B59ACCC92C23F8C7F8C1CA08A57B9ED7',
+        'server' => 'keys.gnupg.net',
+      }
     }
     default: {
       fail("${::operatingsystem} not supported")

@@ -12,6 +12,10 @@ define omd::site::config (
   $livestatus_port     = 6557,
   $livestatus_peers    = undef,
   $nagios_options      = undef,
+  $gearman_server      = undef,
+  $gearman_worker      = undef,
+  $gearmand_port       = undef,
+  $gearman_key         = undef,
 ) {
 
   if $livestatus_peers {
@@ -25,6 +29,11 @@ define omd::site::config (
   $_link_ensure = $ensure ? {
     'absent' => 'absent',
     default  => 'link',
+  }
+
+  $file_ensure = $ensure ? {
+    'present' => 'file',
+    default   => $ensure,
   }
 
   $cgi_cfg_target = $core ? {
@@ -45,34 +54,46 @@ define omd::site::config (
   # Configuration
   #
 
-  file {"${site}_02_fcgid.conf":
-    ensure  => $ensure,
-    path    => "${sitedir}/etc/apache/conf.d/02_fcgid.conf",
-    owner   => $site,
-    group   => $site,
-    mode    => '0644',
-    content => template($fcgid_template),
-  }
+  if $mode != 'none' {
+    file {"${site}_02_fcgid.conf":
+      ensure  => $ensure,
+      path    => "${sitedir}/etc/apache/conf.d/02_fcgid.conf",
+      owner   => $site,
+      group   => $site,
+      mode    => '0644',
+      content => template($fcgid_template),
+    }
 
+    #
+    # Fichero leído por el apache global que determina el modo de ejecución
+    # del site
+    #
+    file { "${sitedir}/etc/apache/mode.conf":
+      ensure => $_link_ensure,
+      target => "mode_${mode}_${site}.conf",
+      notify => Class['apache::service'],
+    }
 
-  #
-  # Fichero leído por el apache global que determina el modo de ejecución
-  # del site
-  #
-  file { "${sitedir}/etc/apache/mode.conf":
-    ensure => $_link_ensure,
-    target => "mode_${mode}_${site}.conf",
-    notify => Class['apache::service'],
-  }
+    apache::dotconf { "mode_${mode}_${site}":
+      ensure   => $ensure,
+      path     => "${sitedir}/etc/apache",
+      owner    => $site,
+      group    => $site,
+      mode     => '0644',
+      template => "omd/site/mode_${mode}.conf.erb",
+      require  => File["${sitedir}/etc/apache/mode.conf"],
+    }
+  } else {
+    file { "${sitedir}/etc/apache/mode.conf":
+      ensure  => $file_ensure,
+      content => '',
+      notify  => Exec["${site}_reload_apache"],
+    }
 
-  apache::dotconf { "mode_${mode}_${site}":
-    ensure   => $ensure,
-    path     => "${sitedir}/etc/apache",
-    owner    => $site,
-    group    => $site,
-    mode     => '0644',
-    template => "omd/site/mode_${mode}.conf.erb",
-    require  => File["${sitedir}/etc/apache/mode.conf"],
+    exec{"${site}_reload_apache":
+      command     => '/etc/init.d/apache reload',
+      refreshonly => true,
+    }
   }
 
   #
@@ -89,7 +110,7 @@ define omd::site::config (
     owner   => $site,
     group   => $site,
     mode    => '0644',
-    content => template('omd/site/apache.conf.erb'),
+    content => template("omd/site/apache.conf_${::lsbdistcodename}.erb"),
   }
 
   if $auth_options and $mode == 'own' {
@@ -119,48 +140,116 @@ define omd::site::config (
   #
   # Configuración del etc/omd/site.conf
   #
-  augeas { "${site}_defaultgui":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_DEFAULT_GUI ${defaultgui}",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
-  }
+  if $ensure == 'present' {
+    shellvar { "${site}_defaultgui":
+      variable => 'CONFIG_DEFAULT_GUI',
+      value    => $defaultgui,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  augeas { "${site}_apache_mode":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_APACHE_MODE ${mode}",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
-  }
+    shellvar { "${site}_apache_mode":
+      variable => 'CONFIG_APACHE_MODE',
+      value    => $mode,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  augeas { "${site}_core":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_CORE '${core}'",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
-  }
+    shellvar { "${site}_core":
+      variable => 'CONFIG_CORE',
+      value    => $core,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  augeas { "${site}_livestatus_tcp":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_LIVESTATUS_TCP '${livestatus}'",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
-  }
+    shellvar { "${site}_livestatus_tcp":
+      variable => 'CONFIG_LIVESTATUS_TCP',
+      value    => $livestatus,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
 
-  augeas { "${site}_livestatus_tcp_port":
-    context => "/files/${sitedir}/etc/omd/site.conf",
-    changes => "set CONFIG_LIVESTATUS_TCP_PORT '${livestatus_port}'",
-    lens    => 'Shellvars.lns',
-    incl    => "${sitedir}/etc/omd/site.conf",
+    shellvar { "${site}_livestatus_tcp_port":
+      variable => 'CONFIG_LIVESTATUS_TCP_PORT',
+      value    => $livestatus_port,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
+
+    $gearmand = $gearman_server ? {
+      true    => 'on',
+      default => 'off',
+    }
+    shellvar {"${site}_gearmand":
+      variable => 'CONFIG_GEARMAND',
+      value    => $gearmand,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
+
+    $gearman_worker_v = $gearman_worker ? {
+      true    => 'on',
+      default => 'off',
+    }
+    shellvar {"${site}_gearman_worker":
+      variable => 'CONFIG_GEARMAN_WORKER',
+      value    => $gearman_worker_v,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
+
+    $gearmand_port_value = $gearmand_port ? {
+      undef   => 'localhost:4730',
+      default => $gearmand_port,
+    }
+    shellvar {"${site}_gearmand_port":
+      variable => 'CONFIG_GEARMAND_PORT',
+      value    => $gearmand_port_value,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
+    shellvar {"${site}_gearmand_port_conf":
+      variable => 'server',
+      value    => $gearmand_port_value,
+      target   => "${sitedir}/etc/mod-gearman/port.conf",
+    }
+
+    if $gearman_server == true or $gearman_worker == true {
+      $mod_gearman_value = 'on'
+      $enable_gearman = true
+    } else {
+      $mod_gearman_value = 'off'
+      $enable_gearman = false
+    }
+    shellvar {"${site}_mod_gearman":
+      variable => 'CONFIG_MOD_GEARMAN',
+      value    => $mod_gearman_value,
+      quoted   => 'single',
+      target   => "${sitedir}/etc/omd/site.conf",
+    }
+
+    if $gearman_key {
+      file {"${site}_gearman_secret.key":
+        ensure  => 'file',
+        path    => "${sitedir}/etc/mod-gearman/secret.key",
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0640',
+        content => $gearman_key,
+      }
+    }
   }
 
   if $ensure == 'present' {
     case $core {
       'nagios': {
         anchor {"omd::site::config::${name}::begin": } ->
-        omd::site::nagios { $site: } ~>
+        omd::site::nagios { $site:
+          enable_gearman => $enable_gearman,
+        } ~>
         anchor {"omd::site::config::${name}::end": }
       }
+      default: { }
     }
   }
 

@@ -86,6 +86,9 @@
 #   resource's providers are supported. If you want to use a different
 #   one, you have to implement it.
 #
+# [*package_key*]
+#   Key, in apt::source format, for the repository where the package is available.
+#
 # [*audit_only*]
 #   Set to 'true' if you don't intend to override existing configuration files
 #   and want to audit the difference between existing files and the ones
@@ -114,6 +117,7 @@ class omd (
   $dir_purge           = $omd::params::dir_purge,
   $package             = $omd::params::package,
   $package_provider    = $omd::params::package_provider,
+  $package_key         = $omd::params::package_key,
   $audit_only          = $omd::params::audit_only,
   $options             = $omd::params::options,
 ) inherits omd::params {
