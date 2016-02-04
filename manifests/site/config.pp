@@ -1,21 +1,22 @@
 define omd::site::config (
   $site,
-  $ensure              = 'present',
-  $mode                = 'own',
-  $defaultgui          = 'welcome',
-  $core                = 'nagios',
-  $auth_options        = undef,
-  $admin_users         = 'omdadmin',
-  $admin_contactgroups = undef,
-  $apache_modules      = [],
-  $livestatus          = 'off',
-  $livestatus_port     = 6557,
-  $livestatus_peers    = undef,
-  $nagios_options      = undef,
-  $gearman_server      = undef,
-  $gearman_worker      = undef,
-  $gearmand_port       = undef,
-  $gearman_key         = undef,
+  $ensure                 = 'present',
+  $mode                   = 'own',
+  $defaultgui             = 'welcome',
+  $core                   = 'nagios',
+  $auth_options           = undef,
+  $admin_users            = 'omdadmin',
+  $admin_contactgroups    = undef,
+  $apache_modules         = [],
+  $livestatus             = 'off',
+  $livestatus_port        = 6557,
+  $livestatus_peers       = undef,
+  $nagios_options         = undef,
+  $gearman_server         = undef,
+  $gearman_worker         = undef,
+  $gearmand_port          = undef,
+  $gearman_key            = undef,
+  $gearman_server_options = {},
 ) {
 
   if $livestatus_peers {
@@ -226,6 +227,17 @@ define omd::site::config (
       value    => $mod_gearman_value,
       quoted   => 'single',
       target   => "${sitedir}/etc/omd/site.conf",
+    }
+
+    if $gearman_server == true {
+      file {"${site} gearman server conf":
+        ensure  => 'file',
+        path    => "${sitedir}/etc/mod-gearman/server.cfg",
+        owner   => $sitename,
+        group   => $sitename,
+        mode    => '0640',
+        content => template('omd/site/mod-gearman/server.cfg.erb'),
+      }
     }
 
     if $gearman_key {
