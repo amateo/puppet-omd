@@ -146,6 +146,7 @@ Puppet::Type.type(:omd_nagios_hostgroup).provide(:ruby) do
       if @property_flush[:ensure] == :absent
         aug.rm(hostgroup_entry)
       else
+        save_with_augeas(aug, hostgroup_entry)
       end
     end
 

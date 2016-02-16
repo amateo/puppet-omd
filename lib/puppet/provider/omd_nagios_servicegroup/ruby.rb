@@ -146,6 +146,7 @@ Puppet::Type.type(:omd_nagios_servicegroup).provide(:ruby) do
       if @property_flush[:ensure] == :absent
         aug.rm(servicegroup_entry)
       else
+        save_with_augeas(aug, servicegroup_entry)
       end
     end
 
