@@ -49,6 +49,15 @@ Puppet::Type.newtype(:thruk_bp) do
     defaultto { @resource[:name] }
   end
 
+  newproperty(:servicegroups) do
+    desc 'Nagios servicegroups this BP belongs to'
+  end
+
+  newproperty(:display_name) do
+    desc 'Nagios service diplay name'
+    defaultto { @resource[:name] }
+  end
+
   newproperty(:function) do
     desc 'Function to use in the main node of the BP'
     defaultto { 'worst()' }
