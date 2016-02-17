@@ -6,6 +6,9 @@ Puppet::Type.newtype(:thruk_bp_node) do
   newparam(:name) do
     desc "The name"
     isnamevar
+    validate do |value|
+      raise ArgumentError, "Thruk_bp_node[#{@resource[:name]}]: Name of thruk_bp_node resource can't contain space blanks" if value =~ /\s/
+    end
   end
 
   newproperty(:site) do
