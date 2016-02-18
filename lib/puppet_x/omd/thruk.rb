@@ -17,6 +17,7 @@ module Puppet_X
         node[:label] = bp[:name]
         node[:id] = 'node1'
         node[:template] = bp[:service_template] if bp[:service_template]
+        node[:rank_dir] = bp[:rank_dir] if bp[:rank_dir]
         nodes = get_childs(bp)
         # Ponemos las dependencias del principal
         node[:depends] = nodes[:depends]['node1'] if nodes[:depends]['node1']
