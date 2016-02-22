@@ -31,6 +31,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
     @property_hash[:function] = resource[:function]
     @property_hash[:service_template] = resource[:service_template] if resource[:service_template]
     @property_hash[:servicegroups] = resource[:servicegroups] if resource[:servicegroups]
+    @property_hash[:notes] = resource[:notes] if resource[:notes]
     @property_hash[:display_name] = resource[:display_name] if resource[:display_name]
     @property_hash[:bp_target] = get_new_filename(self.class.config_path(resource[:site]))
     @property_hash[:target] = get_bp_filename(resource[:name])
@@ -181,6 +182,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       elsif resource[:servicegroups]
         aug.set(aug_service_path + '/servicegroups', resource[:servicegroups])
       end
+      aug.set(aug_service_path + '/notes', resource[:notes])
       aug.set(aug_service_path + '/display_name', resource[:display_name])
       aug.set(aug_service_path + '/_THRUK_BP_ID', bp_id)
       aug.set(aug_service_path + '/_THRUK_NODE_ID', 'node1')
