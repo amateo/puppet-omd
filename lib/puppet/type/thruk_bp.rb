@@ -54,7 +54,7 @@ Puppet::Type.newtype(:thruk_bp) do
   end
 
   newproperty(:notes) do
-    desc 'Nagios servicegroups this BP belongs to'
+    desc 'Nagios notes for this BP service'
   end
 
   newproperty(:display_name) do
