@@ -53,6 +53,10 @@ Puppet::Type.newtype(:thruk_bp) do
     desc 'Nagios servicegroups this BP belongs to'
   end
 
+  newproperty(:notes) do
+    desc 'Nagios servicegroups this BP belongs to'
+  end
+
   newproperty(:display_name) do
     desc 'Nagios service diplay name'
     defaultto { @resource[:name] }
