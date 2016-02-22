@@ -31,24 +31,27 @@
 #   User of array of users with administration privileges.
 #
 define omd::site (
-  $site                   = '',
-  $ensure                 = 'present',
-  $mode                   = 'own',
-  $defaultgui             = 'welcome',
-  $core                   = 'nagios',
-  $auth_options           = '',
-  $apache_modules         = [],
-  $admin_users            = 'omdadmin',
-  $admin_contactgroups    = undef,
-  $livestatus             = 'off',
-  $livestatus_port        = undef,
-  $livestatus_peers       = undef,
-  $nagios_options         = undef,
-  $gearman_server         = undef,
-  $gearman_worker         = undef,
-  $gearmand_port          = undef,
-  $gearman_key            = undef,
-  $gearman_server_options = {},
+  $site                                     = '',
+  $ensure                                   = 'present',
+  $mode                                     = 'own',
+  $defaultgui                               = 'welcome',
+  $core                                     = 'nagios',
+  $auth_options                             = '',
+  $apache_modules                           = [],
+  $admin_users                              = 'omdadmin',
+  $admin_contactgroups                      = undef,
+  $authorized_for_system_information        = undef,
+  $authorized_for_configuration_information = undef,
+  $authorized_for_all_services              = undef,
+  $livestatus                               = 'off',
+  $livestatus_port                          = undef,
+  $livestatus_peers                         = undef,
+  $nagios_options                           = undef,
+  $gearman_server                           = undef,
+  $gearman_worker                           = undef,
+  $gearmand_port                            = undef,
+  $gearman_key                              = undef,
+  $gearman_server_options                   = {},
 ) {
   # Validación
   validate_re($ensure, '^(present|absent)$',
@@ -74,6 +77,18 @@ define omd::site (
 
   if !is_array($admin_contactgroups) and !is_string($admin_contactgroups) {
     fail('admin_contactgroups parameter must be a String or Array of Strings')
+  }
+
+  if !is_array($authorized_for_system_information) and !is_string($authorized_for_system_information) {
+    fail('authorized_for_system_information parameter must be a String or Array of Strings')
+  }
+
+  if !is_array($authorized_for_configuration_information) and !is_string($authorized_for_configuration_information) {
+    fail('authorized_for_configuration_information parameter must be a String or Array of Strings')
+  }
+
+  if !is_array($authorized_for_all_services) and !is_string($authorized_for_all_services) {
+    fail('authorized_for_all_services parameter must be a String or Array of Strings')
   }
 
   if size($apache_modules) and $mode == 'shared' {
@@ -122,24 +137,27 @@ define omd::site (
     site   => $sitename,
   } ->
   ::omd::site::config {$name:
-    ensure                 => $ensure,
-    site                   => $sitename,
-    mode                   => $mode,
-    defaultgui             => $defaultgui,
-    core                   => $core,
-    auth_options           => $auth_options,
-    admin_users            => $admin_users,
-    admin_contactgroups    => $admin_contactgroups,
-    apache_modules         => $apache_modules,
-    livestatus             => $livestatus,
-    livestatus_port        => $livestatus_port,
-    livestatus_peers       => $livestatus_peers,
-    nagios_options         => $nagios_options,
-    gearman_server         => $gearman_server,
-    gearman_worker         => $gearman_worker,
-    gearmand_port          => $gearmand_port,
-    gearman_key            => $gearman_key,
-    gearman_server_options => $gearman_server_options,
+    ensure                                   => $ensure,
+    site                                     => $sitename,
+    mode                                     => $mode,
+    defaultgui                               => $defaultgui,
+    core                                     => $core,
+    auth_options                             => $auth_options,
+    admin_users                              => $admin_users,
+    admin_contactgroups                      => $admin_contactgroups,
+    authorized_for_system_information        => $authorized_for_system_information,
+    authorized_for_configuration_information => $authorized_for_configuration_information,
+    authorized_for_all_services              => $authorized_for_all_services,
+    apache_modules                           => $apache_modules,
+    livestatus                               => $livestatus,
+    livestatus_port                          => $livestatus_port,
+    livestatus_peers                         => $livestatus_peers,
+    nagios_options                           => $nagios_options,
+    gearman_server                           => $gearman_server,
+    gearman_worker                           => $gearman_worker,
+    gearmand_port                            => $gearmand_port,
+    gearman_key                              => $gearman_key,
+    gearman_server_options                   => $gearman_server_options,
   } ~>
   ::omd::site::service {$name:
     ensure => $ensure,

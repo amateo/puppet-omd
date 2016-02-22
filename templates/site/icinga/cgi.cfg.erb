@@ -163,7 +163,14 @@ use_ssl_authentication=0
 # Alternatively you can specify contactgroups too, starting
 # with Icinga 1.5.0
 
-authorized_for_system_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%-
+  if @authorized_for_system_information
+    afsi = "," + (@authorized_for_system_information.respond_to?('join') ? @authorized_for_system_information.join(',') : @authorized_for_system_information)
+  else
+    afsi = ''
+  end
+-%>
+authorized_for_system_information=<%= (@admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users).concat(afsi) %>
 <%- if @admin_contactgroups -%>
 authorized_contactgroup_for_system_information=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
@@ -181,7 +188,14 @@ authorized_contactgroup_for_system_information=<%= @admin_contactgroups.respond_
 # Alternatively you can specify contactgroups too, starting
 # with Icinga 1.5.0
 
-authorized_for_configuration_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%-
+  if @authorized_for_configuration_information then
+    afci = "," + (@authorized_for_configuration_information.respond_to?('join') ? @authorized_for_configuration_information.join(',') : @authorized_for_configuration_information)
+  else
+    afci = ''
+  end
+-%>
+authorized_for_configuration_information=<%= (@admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users).concat(afci) %>
 <%- if @admin_contactgroups -%>
 authorized_contactgroup_for_configuration_information=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
 <%- else -%>
@@ -236,7 +250,14 @@ authorized_contactgroup_for_system_commands=<%= @admin_contactgroups.respond_to?
 # with Icinga 1.5.0
 
 
-authorized_for_all_services=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%-
+  if @authorized_for_all_services then
+    afas = "," + (@authorized_for_all_services.respond_to?('join') ? @authorized_for_all_services.join(',') : @authorized_for_all_services)
+  else
+    afas = ''
+  end
+-%>
+authorized_for_all_services=<%= (@admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users).concat(afas) %>
 authorized_for_all_hosts=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 <%- if @admin_contactgroups -%>
 authorized_contactgroup_for_all_services=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>
