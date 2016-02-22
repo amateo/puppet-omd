@@ -86,7 +86,14 @@ use_ssl_authentication=0
 # not use authorization.  You may use an asterisk (*) to
 # authorize any user who has authenticated to the web server.
 
-authorized_for_system_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%-
+  if @authorized_for_system_information
+    afsi = "," + (@authorized_for_system_information.respond_to?('join') ? @authorized_for_system_information.join(',') : @authorized_for_system_information)
+  else
+    afsi = ''
+  end
+-%>
+authorized_for_system_information=<%= (@admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users).concat(afsi) %>
 
 
 
@@ -98,7 +105,14 @@ authorized_for_system_information=<%= @admin_users.respond_to?('join') ? @admin_
 # an asterisk (*) to authorize any user who has authenticated
 # to the web server.
 
-authorized_for_configuration_information=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%-
+  if @authorized_for_configuration_information then
+    afci = "," + (@authorized_for_configuration_information.respond_to?('join') ? @authorized_for_configuration_information.join(',') : @authorized_for_configuration_information)
+  else
+    afci = ''
+  end
+-%>
+authorized_for_configuration_information=<%= (@admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users).concat(afci) %>
 
 
 
