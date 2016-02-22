@@ -42,6 +42,7 @@ define omd::site (
   $admin_contactgroups                      = undef,
   $authorized_for_system_information        = undef,
   $authorized_for_configuration_information = undef,
+  $authorized_for_all_services              = undef,
   $livestatus                               = 'off',
   $livestatus_port                          = undef,
   $livestatus_peers                         = undef,
@@ -84,6 +85,10 @@ define omd::site (
 
   if !is_array($authorized_for_configuration_information) and !is_string($authorized_for_configuration_information) {
     fail('authorized_for_configuration_information parameter must be a String or Array of Strings')
+  }
+
+  if !is_array($authorized_for_all_services) and !is_string($authorized_for_all_services) {
+    fail('authorized_for_all_services parameter must be a String or Array of Strings')
   }
 
   if size($apache_modules) and $mode == 'shared' {
@@ -142,6 +147,7 @@ define omd::site (
     admin_contactgroups                      => $admin_contactgroups,
     authorized_for_system_information        => $authorized_for_system_information,
     authorized_for_configuration_information => $authorized_for_configuration_information,
+    authorized_for_all_services              => $authorized_for_all_services,
     apache_modules                           => $apache_modules,
     livestatus                               => $livestatus,
     livestatus_port                          => $livestatus_port,

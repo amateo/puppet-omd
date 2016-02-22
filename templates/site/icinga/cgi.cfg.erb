@@ -250,7 +250,14 @@ authorized_contactgroup_for_system_commands=<%= @admin_contactgroups.respond_to?
 # with Icinga 1.5.0
 
 
-authorized_for_all_services=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
+<%-
+  if @authorized_for_all_services then
+    afas = "," + (@authorized_for_all_services.respond_to?('join') ? @authorized_for_all_services.join(',') : @authorized_for_all_services)
+  else
+    afas = ''
+  end
+-%>
+authorized_for_all_services=<%= (@admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users).concat(afas) %>
 authorized_for_all_hosts=<%= @admin_users.respond_to?('join') ? @admin_users.join(',') : @admin_users %>
 <%- if @admin_contactgroups -%>
 authorized_contactgroup_for_all_services=<%= @admin_contactgroups.respond_to?('join') ? @admin_contactgroups.join(',') : @admin_contactgroups %>

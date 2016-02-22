@@ -9,6 +9,7 @@ define omd::site::config (
   $admin_contactgroups                      = undef,
   $authorized_for_system_information        = undef,
   $authorized_for_configuration_information = undef,
+  $authorized_for_all_services              = undef,
   $apache_modules                           = [],
   $livestatus                               = 'off',
   $livestatus_port                          = 6557,
