@@ -1,3 +1,5 @@
+# Define omd::nagios::plugin
+#
 define omd::nagios::plugin (
   $ensure  = 'present',
   $version = 'default',
@@ -7,6 +9,7 @@ define omd::nagios::plugin (
   $owner   = 'root',
   $group   = 'root',
   $mode    = '0755',
+  $recurse = undef,
 ) {
   file { $name:
     path    => "/opt/omd/versions/${version}/lib/nagios/plugins/${name}",
@@ -15,6 +18,7 @@ define omd::nagios::plugin (
     mode    => $mode,
     source  => $source,
     content => $content,
-    target  => $target
+    target  => $target,
+    recurse => $recurse,
   }
 }
