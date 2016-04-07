@@ -1,6 +1,6 @@
-require 'augeas'
-
 Puppet::Type.type(:omd_nagios_host).provide(:ruby) do
+  confine :feature => :augeas
+
   defaultfor :osfamily => :debian
 
   mk_resource_methods
