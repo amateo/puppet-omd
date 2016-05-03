@@ -1,5 +1,3 @@
-require 'json'
-
 begin
   require 'puppet_x/omd/thruk'
 rescue
