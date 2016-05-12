@@ -78,14 +78,15 @@ define omd::site::config (
       notify => Class['apache::service'],
     }
 
-    apache::dotconf { "mode_${mode}_${site}":
-      ensure   => $ensure,
-      path     => "${sitedir}/etc/apache",
-      owner    => $site,
-      group    => $site,
-      mode     => '0644',
-      template => "omd/site/mode_${mode}.conf.erb",
-      require  => File["${sitedir}/etc/apache/mode.conf"],
+    file { "mode_${mode}_${site}":
+      ensure  => $ensure,
+      path    => "${sitedir}/etc/apache/mode_${mode}_${site}.conf",
+      owner   => $site,
+      group   => $site,
+      mode    => '0644',
+      content => template("omd/site/mode_${mode}.conf.erb"),
+      require => File["${sitedir}/etc/apache/mode.conf"],
+      notify  => Class['apache::service'],
     }
   } else {
     file { "${sitedir}/etc/apache/mode.conf":
