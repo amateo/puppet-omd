@@ -180,13 +180,13 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
       elsif resource[:servicegroups]
         aug.set(aug_service_path + '/servicegroups', resource[:servicegroups])
       end
-      aug.set(aug_service_path + '/notes', resource[:notes])
+      aug.set(aug_service_path + '/notes', resource[:notes]) if resource[:notes]
       aug.set(aug_service_path + '/display_name', resource[:display_name])
       aug.set(aug_service_path + '/_THRUK_BP_ID', bp_id)
       aug.set(aug_service_path + '/_THRUK_NODE_ID', 'node1')
     end
 
-    aug.save
+    aug.save!
     aug.close
 
     # Reload nagios
