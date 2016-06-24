@@ -26,7 +26,10 @@ Puppet::Type.newtype(:omd_nagios_hostgroup) do
       elsif value == ''
         return :absent
       else
-        return value
+        if value.respond_to?('force_encoding') then
+          value.force_encoding('ASCII-8BIT')
+        end
+        return super(value)
       end
     end
   end
