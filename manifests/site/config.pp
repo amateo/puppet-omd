@@ -133,7 +133,7 @@ define omd::site::config (
     # No tengo claro que este sea el mejor sitio para hacer esto, pero
     # bueno.
     if has_key($auth_options, 'AuthBasicProvider') {
-      if $auth_options[AuthBasicProvider] =~ /(?i:\bsasl\b)/ {
+      if $auth_options['AuthBasicProvider'] =~ /(?i:\bsasl\b)/ {
         exec {"${site}_add_group_sasl":
           command => "/usr/sbin/usermod -a -G sasl ${site}",
           unless  => "/usr/bin/groups ${site} | /bin/egrep -q '\bsasl\b'",

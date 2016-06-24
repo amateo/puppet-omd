@@ -2,7 +2,7 @@
 #
 class omd::install {
   case $::osfamily {
-    Debian: {
+    'Debian': {
       class {'omd::install::debian':} ->
       Class['omd::install']
     }
