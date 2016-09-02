@@ -59,7 +59,7 @@ module Puppet_X
       end
 
       def bp_internal_path
-        return '/var/lib/puppet/thruk'
+        return "#{Puppet[:vardir]}/thruk"
       end
 
       def get_bp_filename(name)
