@@ -82,7 +82,7 @@ Puppet::Type.type(:thruk_bp).provide(:ruby) do
   end
 
   def self.bp_internal_path
-    return '/var/lib/puppet/thruk'
+    return "#{Puppet[:vardir]}/thruk"
   end
 
   def get_new_filename(path)
