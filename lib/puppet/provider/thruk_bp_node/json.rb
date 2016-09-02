@@ -81,6 +81,7 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
   #
 
   def self.bp_internal_path
+    Puppet.debug("BP_INTERNAL_PATH: #{Puppet[:vardir]}/thruk")
     return "#{Puppet[:vardir]}/thruk"
   end
 
