@@ -1,9 +1,18 @@
+begin
+  require 'puppet_x/omd'
+rescue
+  libdir = Puppet::settings.value('vardir').to_s
+  require File.join(libdir, 'puppet_x/omd')
+end
+
 Puppet::Type.newtype(:omd_nagios_host) do
   @doc = 'Creates a nagios host object in an OMD site'
   desc <<-EOT
     Creates a nagios host object in an OMD site
 
   EOT
+
+  include Puppet_X::Omd
 
   ensurable
 
@@ -39,7 +48,7 @@ Puppet::Type.newtype(:omd_nagios_host) do
     isnamevar
   end
 
-  newproperty(:site) do
+  newparam(:site) do
     desc 'OMD site in which to create the nagios host object'
     validate do |value|
       unless value =~ /^.+$/
@@ -229,15 +238,32 @@ Puppet::Type.newtype(:omd_nagios_host) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:target) do
-    desc 'Nagios configuration file parameter.'
-    defaultto do
-      if @resource[:site]
-        '/omd/sites/' + @resource[:site] + '/etc/nagios/conf.d/hosts_puppet.cfg'
-      else
-        ''
+  newproperty(:custom) do
+    desc "Custom host attributes"
+
+    munge do |value|
+      new = {}
+      value.each_pair do |k, v|
+        new[k.upcase] = v
+      end
+      new
+    end
+
+    validate do |value|
+      value.each_key do |k|
+        if !k.start_with?('_') then
+          raise ArgumentError, 'custom keys must begin with _'
+        end
       end
     end
+
+    def insync?(is)
+      is == should
+    end
+  end
+
+  newparam(:target) do
+    desc 'Nagios configuration file parameter.'
   end
 
   newproperty(:use, :parent => HostParam) do

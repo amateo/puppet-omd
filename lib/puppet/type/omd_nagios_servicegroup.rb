@@ -1,9 +1,18 @@
+begin
+  require 'puppet_x/omd'
+rescue
+  libdir = Puppet::settings.value('vardir').to_s
+  require File.join(libdir, 'puppet_x/omd')
+end
+
 Puppet::Type.newtype(:omd_nagios_servicegroup) do
   @doc = 'Creates a nagios servicegroup object in an OMD site'
   desc <<-EOT
     Creates a nagios servicegroup object in an OMD site
 
   EOT
+
+  include Puppet_X::Omd
 
   ensurable
 
@@ -39,7 +48,7 @@ Puppet::Type.newtype(:omd_nagios_servicegroup) do
     isnamevar
   end
 
-  newproperty(:site) do
+  newparam(:site) do
     desc 'OMD site in which to create the nagios servicegroup object'
     validate do |value|
       unless value =~ /^.+$/
@@ -81,15 +90,8 @@ Puppet::Type.newtype(:omd_nagios_servicegroup) do
     desc 'Nagios configuration file parameter.'
   end
 
-  newproperty(:target) do
+  newparam(:target) do
     desc 'Nagios configuration file parameter.'
-    defaultto do
-      if @resource[:site]
-        '/omd/sites/' + @resource[:site] + '/etc/nagios/conf.d/servicegroups_puppet.cfg'
-      else
-        ''
-      end
-    end
   end
 
   newproperty(:use, :parent => ServiceGroupParam) do
