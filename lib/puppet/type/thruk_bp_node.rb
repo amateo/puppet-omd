@@ -78,6 +78,7 @@ Puppet::Type.newtype(:thruk_bp_node) do
 
   newparam(:target) do
     desc 'The file to store the BP definition'
+    defaultto { Puppet[:vardir] + '/thruk/node_' + @resource[:name].gsub(' ', '_').gsub('/', '_') + '.json' }
   end
 
   autorequire(:thruk_bp) do
