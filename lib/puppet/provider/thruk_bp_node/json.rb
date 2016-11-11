@@ -85,10 +85,17 @@ Puppet::Type.type(:thruk_bp_node).provide(:ruby) do
   end
 
   def self.load_nodes
+    Puppet.debug("SELF.LOAD_NODES BEGIN")
+    Puppet.debug("SELF.LOAD_NODES INTERNAL PATH: #{bp_internal_path}")
     nodes = []
-    Dir[bp_internal_path + '/node_*.json'].each do |f|
-      @property_hash = JSON.parse(File.read(f), { :symbolize_names => true })
-      nodes.push(@property_hash)
+    if Dir.exists?(bp_internal_path)
+      Dir[bp_internal_path + '/node_*.json'].each do |f|
+        Puppet.debug("SELF.PARSE_FILE: Parsing file #{f}")
+        @property_hash = JSON.parse(File.read(f), { :symbolize_names => true })
+        nodes.push(@property_hash)
+      end
+    else
+      Puppet.debug("SELF.PARSE_FILE: No existe dir thruk")
     end
     nodes
   end
