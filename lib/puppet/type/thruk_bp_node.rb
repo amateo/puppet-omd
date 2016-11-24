@@ -1,14 +1,22 @@
 Puppet::Type.newtype(:thruk_bp_node) do
-  @doc = "asdflkajsdfkjf"
+  @doc = "Creates a node in a Thruk BP"
 
-  ensurable
+  ensurable do
+    defaultvalues
 
-  newparam(:name) do
+    defaultto { :present }
+  end
+
+  def exists?
+    self[:ensure] == :present
+  end
+
+  newparam(:name, :namevar => true) do
     desc "The name"
     isnamevar
     validate do |value|
       if match = value.match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
-        site, bp, id = match.captures
+        id = match.captures[2]
         raise ArgumentError, "Thruk_bp_node[#{value}]: Name of thruk_bp_node resource can't contain space blanks" if id =~ /\s/
       else
         raise ArgumentError, "Thruk_bp_node[#{value}]: Name of thruk_bp_node resource can't contain space blanks" if @resource[:name] =~ /\s/
@@ -16,12 +24,11 @@ Puppet::Type.newtype(:thruk_bp_node) do
     end
   end
 
-  newproperty(:site) do
+  newparam(:site) do
     desc "site"
     defaultto do
       if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
-        site, bp, id = match.captures
-        site
+        match.captures[0]
       else
         :absent
       end
@@ -31,12 +38,11 @@ Puppet::Type.newtype(:thruk_bp_node) do
     end
   end
 
-  newproperty(:bp) do
+  newparam(:bp) do
     desc "bp"
     defaultto do
       if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
-        site, bp, id = match.captures
-        bp
+        match.captures[1]
       else
         :absent
       end
@@ -46,12 +52,11 @@ Puppet::Type.newtype(:thruk_bp_node) do
     end
   end
 
-  newproperty(:id) do
+  newparam(:id) do
     desc 'Id'
     defaultto do
       if match = @resource[:name].match(/^([^\/]+)\/([^\/]+)\/([^\/]+)$/)
-        site, bp, id = match.captures
-        id
+        match.captures[2]
       else
         @resource[:name]
       end
@@ -61,27 +66,41 @@ Puppet::Type.newtype(:thruk_bp_node) do
     end
   end
 
-  newproperty(:label) do
+  newparam(:label) do
     desc 'Label'
     defaultto { @resource[:id] }
   end
 
-  newproperty(:parent) do
+  newparam(:parent) do
     desc "parent"
     defaultto { 'node1' }
   end
 
-  newproperty(:function) do
+  newparam(:function) do
     desc "function"
     defaultto { "fixed('OK')" }
   end
-
-  newparam(:target) do
-    desc 'The file to store the BP definition'
+  
+  autorequire(:thruk_bp) do
+    #unless catalog.resource("Thruk_bp[#{self[:bp]}]")
+    #  warning "Target Thruk_bp[#{self[:bp]}] not found in the catalog"
+    #end
+    [self[:bp]]
   end
 
-  autorequire(:thruk_bp) do
-    [ self[:bp] ]
+  autorequire(:thruk_bp_node) do
+    if self[:parent] != 'node1'
+      deps = catalog.resources.collect do |r|
+        if r.is_a?(Puppet::Type.type(:thruk_bp_node)) &&
+          r[:site] == self[:site] && r[:bp] == self[:bp] && r[:id] == self[:parent]
+          r.name
+        end
+      end.compact
+      #if deps.empty?
+      #  warning "Parent node \"#{self[:parent]}\" for Thruk_bp_node[#{self[:name]} not found in the catalog"
+      #end
+      deps
+    end
   end
 
 end
