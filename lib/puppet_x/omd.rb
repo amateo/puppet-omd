@@ -88,6 +88,10 @@ module Puppet_X
 
     def save_to_disk(resource)
       raise Puppet::Error, 'You must provide a site paramater' if !resource.propertydefined?(:site)
+      if !resource[:target] or resource[:target] == ''
+        resource[:target] = Puppet_X::Omd::file_path_for_object(resource.type, resource[:site])
+        Puppet.debug("#{resource[:name]}: Assigning default target to #{resource[:target]}")
+      end
 
       # Abrimos fichero con augeas
       aug = Augeas::open(nil, nil, Augeas::NO_MODL_AUTOLOAD)
