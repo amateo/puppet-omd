@@ -81,11 +81,11 @@ Puppet::Type.newtype(:thruk_bp) do
     desc 'Nagios template to use for the nagios service object created'
     defaultto { 'thruk-bp-node-template' }
   end
-
-  newparam(:host_name, :parent => NagiosParam) do
-    desc 'Name of the nagios host created'
-    defaultto { @resource[:name] }
-  end
+  #
+  #newparam(:host_name, :parent => NagiosParam) do
+  #  desc 'Name of the nagios host created'
+  #  defaultto { @resource[:name] }
+  #end
 
   newparam(:servicegroups, :parent => NagiosParam) do
     desc 'Nagios servicegroups this BP belongs to'
@@ -139,7 +139,7 @@ Puppet::Type.newtype(:thruk_bp) do
     json = Hash.new
     json[:rankDir] = self[:rank_dir].to_s.force_encoding('UTF-8') if self[:rank_dir]
     json[:state_type] = self[:state_type].to_s.force_encoding('UTF-8') if self[:state_type]
-    json[:name] = self[:host_name].force_encoding('UTF-8') if self[:host_name]
+    json[:name] = self[:name]
     json[:template] = self[:host_template].force_encoding('UTF-8') if self[:host_template]
 
     # Nodo raíz
@@ -189,11 +189,11 @@ Puppet::Type.newtype(:thruk_bp) do
     bp_id = self[:target].match(/^.+\/(\d+)\.tbp$/)[1]
 
     nagios_host_opts = {
-      :name => "#{self[:host_name]}",
+      :name => "#{self[:name]}",
       :ensure => "#{self[:ensure].to_s.force_encoding('UTF-8')}",
       :use => self[:host_template],
-      :host_name => self[:host_name],
-      :nagios_alias => "Business Process: #{self[:host_name]}",
+      :host_name => self[:name],
+      :nagios_alias => "Business Process: #{self[:name]}",
       :site => self[:site],
       :custom => {
         '_THRUK_BP_ID' => bp_id,
@@ -206,7 +206,7 @@ Puppet::Type.newtype(:thruk_bp) do
     nagios_service_opts = {
       :name => "#{self[:name]}",
       :use => self[:service_template],
-      :host_name => self[:host_name],
+      :host_name => self[:name],
       :service_description => self[:name],
       :display_name => self[:display_name],
       :site => self[:site],
@@ -236,7 +236,7 @@ Puppet::Type.newtype(:thruk_bp) do
 
     [
       catalog.resource("File[#{self[:target]}]"),
-      catalog.resource("Omd_nagios_host[#{self[:host_name]}]"),
+      catalog.resource("Omd_nagios_host[#{self[:name]}]"),
       catalog.resource("Omd_nagios_service[#{self[:name]}]")
     ]
   end
