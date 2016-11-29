@@ -217,6 +217,8 @@ Puppet::Type.newtype(:thruk_bp) do
       :target => "#{site_path}/etc/nagios/conf.d/thruk_bp_generated.cfg",
       :notify => "Omd::Site::Service[#{self[:site]}]",
     }
+    nagios_service_opts[:notes] = self[:notes] if self[:notes]
+    nagios_service_opts[:servicegroups] = self[:servicegroups] if self[:servicegroups]
 
     [
       Puppet::Type.type(:file).new(file_opts),
