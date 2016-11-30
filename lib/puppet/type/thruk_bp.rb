@@ -188,42 +188,42 @@ Puppet::Type.newtype(:thruk_bp) do
     
     bp_id = self[:target].match(/^.+\/(\d+)\.tbp$/)[1]
 
-    nagios_host_opts = {
-      :name => "#{self[:name]}",
-      :ensure => "#{self[:ensure].to_s.force_encoding('UTF-8')}",
-      :use => self[:host_template],
-      :host_name => self[:name],
-      :nagios_alias => "Business Process: #{self[:name]}",
-      :site => self[:site],
-      :custom => {
-        '_THRUK_BP_ID' => bp_id,
-        '_THRUK_NODE_ID' => 'node1',
-      },
-      :target => "#{site_path}/etc/nagios/conf.d/thruk_bp_generated.cfg",
-      :notify => "Omd::Site::Service[#{self[:site]}]",
-    }
-
-    nagios_service_opts = {
-      :name => "#{self[:name]}",
-      :use => self[:service_template],
-      :host_name => self[:name],
-      :service_description => self[:name],
-      :display_name => self[:display_name],
-      :site => self[:site],
-      :custom => {
-        '_THRUK_BP_ID' => bp_id,
-        '_THRUK_NODE_ID' => 'node1',
-      },
-      :target => "#{site_path}/etc/nagios/conf.d/thruk_bp_generated.cfg",
-      :notify => "Omd::Site::Service[#{self[:site]}]",
-    }
-    nagios_service_opts[:notes] = self[:notes] if self[:notes]
-    nagios_service_opts[:servicegroups] = self[:servicegroups] if self[:servicegroups]
+    #nagios_host_opts = {
+    #  :name => "#{self[:name]}",
+    #  :ensure => "#{self[:ensure].to_s.force_encoding('UTF-8')}",
+    #  :use => self[:host_template],
+    #  :host_name => self[:name],
+    #  :nagios_alias => "Business Process: #{self[:name]}",
+    #  :site => self[:site],
+    #  :custom => {
+    #    '_THRUK_BP_ID' => bp_id,
+    #    '_THRUK_NODE_ID' => 'node1',
+    #  },
+    #  :target => "#{site_path}/etc/nagios/conf.d/thruk_bp_generated.cfg",
+    #  :notify => "Omd::Site::Service[#{self[:site]}]",
+    #}
+    #
+    #nagios_service_opts = {
+    #  :name => "#{self[:name]}",
+    #  :use => self[:service_template],
+    #  :host_name => self[:name],
+    #  :service_description => self[:name],
+    #  :display_name => self[:display_name],
+    #  :site => self[:site],
+    #  :custom => {
+    #    '_THRUK_BP_ID' => bp_id,
+    #    '_THRUK_NODE_ID' => 'node1',
+    #  },
+    #  :target => "#{site_path}/etc/nagios/conf.d/thruk_bp_generated.cfg",
+    #  :notify => "Omd::Site::Service[#{self[:site]}]",
+    #}
+    #nagios_service_opts[:notes] = self[:notes] if self[:notes]
+    #nagios_service_opts[:servicegroups] = self[:servicegroups] if self[:servicegroups]
 
     [
       Puppet::Type.type(:file).new(file_opts),
-      Puppet::Type.type(:omd_nagios_host).new(nagios_host_opts),
-      Puppet::Type.type(:omd_nagios_service).new(nagios_service_opts)
+      #Puppet::Type.type(:omd_nagios_host).new(nagios_host_opts),
+      #Puppet::Type.type(:omd_nagios_service).new(nagios_service_opts)
     ]
   end
 
@@ -236,8 +236,8 @@ Puppet::Type.newtype(:thruk_bp) do
 
     [
       catalog.resource("File[#{self[:target]}]"),
-      catalog.resource("Omd_nagios_host[#{self[:name]}]"),
-      catalog.resource("Omd_nagios_service[#{self[:name]}]")
+      #catalog.resource("Omd_nagios_host[#{self[:name]}]"),
+      #catalog.resource("Omd_nagios_service[#{self[:name]}]")
     ]
   end
 
@@ -251,13 +251,16 @@ Puppet::Type.newtype(:thruk_bp) do
 
 
   def find_bp_file(name)
+    Puppet.debug("FIND_BP_FILE(#{name})")
     Dir[bp_path + '/*.tbp'].each do |f|
       json = JSON.parse(File.read(f), { :symbolize_names => true })
       if json[:name] == name
         FileUtils.touch(f)
+        Puppet.debug("FIND_BP_FILE #{name}: #{f}")
         return f
       end
     end
+    Puppet.debug("FIND_BP_file #{name}: Not found")
     nil
   end
 
